@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request, session
 from sqlalchemy.orm import sessionmaker
 from lib.database_generator import engine, Organisatie, Beheerder, Ervaringsdeskundige
 from src.register_controller import register_bp
+from src.login_controller import login_bp
 from werkzeug.security import check_password_hash
 
 app = Flask(__name__, template_folder='template')
@@ -12,6 +13,7 @@ Session = sessionmaker(bind=engine)
 db_session = Session()
 
 app.register_blueprint(register_bp)
+app.register_blueprint(login_bp)
 
 @app.route('/')
 def home():

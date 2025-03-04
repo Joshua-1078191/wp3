@@ -16,7 +16,7 @@ class Organisatie(Base):
     contactpersoon = Column(String, nullable=True)
     telefoonnummer = Column(String, nullable=True)
     overige_details = Column(String, nullable=True)
-
+    api_key = Column(String, nullable=True)
     onderzoeken = relationship("Onderzoek", back_populates="organisatie")
 
 
@@ -129,7 +129,6 @@ class OnderzoekErvaringsdeskundige(Base):
 
     ervaringsdeskundige = relationship("Ervaringsdeskundige", back_populates="onderzoeken_2")
 
-
 # Database connection setup
 DATABASE_URL = "sqlite:///databases/database.db"
 engine = create_engine(DATABASE_URL, echo=True)
@@ -141,4 +140,4 @@ db_session = Session()
 
 print("✅ Database and tables created successfully!")
 
-__all__ = ['db_session', 'Ervaringsdeskundige']
+__all__ = ['db_session', 'Ervaringsdeskundige', 'User', 'validate_api_key']
