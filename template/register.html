@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="navbar-brand">
+                <img src="{{ url_for('static', filename='images/testlogo.png') }}" alt="Logo" />
+            </a>
+        </nav>
+    </header>
+    <section class="register-form">
+        <h1>Register as Ervaringsdeskundige</h1>
+        <form action="{{ url_for('register_bp.register') }}" method="POST">
+            <input type="text" name="voornaam" placeholder="First Name" required>
+            <input type="text" name="achternaam" placeholder="Last Name" required>
+            <input type="text" name="postcode" placeholder="Postal Code" required>
+            <input type="text" name="geslacht" placeholder="Gender" required>
+            <input type="email" name="emailadres" placeholder="Email" required>
+            <input type="text" name="telefoonnummer" placeholder="Phone Number">
+            <input type="date" name="geboortedatum" placeholder="Date of Birth" required>
+            <input type="text" name="gebruikte_hulpmiddelen" placeholder="Used Aids">
+            <textarea name="kort_voorstellen" placeholder="Short Introduction"></textarea>
+            <textarea name="bijzonderheden" placeholder="Remarks"></textarea>
+            <input type="checkbox" name="akkoord_voorwaarden" required>
+            <label for="akkoord_voorwaarden">Agree to Terms</label>
+            <input type="checkbox" name="toezichthouder" required>
+            <label for="toezichthouder">Supervisor</label>
+            <input type="text" name="naam_toezichthouder" placeholder="Supervisor Name">
+            <input type="email" name="email_toezichthouder" placeholder="Supervisor Email">
+            <input type="text" name="telefoon_toezichthouder" placeholder="Supervisor Phone">
+            <button type="submit" class="btn">Register</button>
+        </form>
+    </section>
+</body>
+</html>

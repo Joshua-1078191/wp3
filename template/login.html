@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="navbar-brand">
+                <img src="{{ url_for('static', filename='images/testlogo.png') }}" alt="Logo" />
+            </a>
+        </nav>
+    </header>
+    <section class="login-form">
+        <h1>Login</h1>
+        <form action="{{ url_for('login') }}" method="POST">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" class="btn">Login</button>
+        </form>
+    </section>
+</body>
+</html>

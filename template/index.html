@@ -4,24 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Accessibility Hub - Home</title>
-  <link rel="stylesheet" href="../static/style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
   <header>
     <nav class="navbar">
       <a href="index.html" class="navbar-brand">
-        <img src="../docs/images/testlogo.png" alt="Logo" />
-        Accessibility Hub
+        <img src="{{ url_for('static', filename='images/testlogo.png') }}" alt="Logo" />
       </a>
       <ul class="navbar-nav">
         <li><a href="index.html" class="nav-link" aria-current="page">Home</a></li>
         <li><a href="onderzoeken.html" class="nav-link">Onderzoeken</a></li>
         <li><a href="account.html" class="nav-link">Account</a></li>
       </ul>
+        <div class="dropdown">
+          <button class="dropbtn">{% if user_type == 'organization' %}
+            <h1>Organization User</h1>
+          {% elif user_type == 'admin' %}
+            <h1>Admin User</h1>
+          {% endif %}</button>
+          <div class="dropdown-content">
+            <a href="{{ url_for('logout') }}">Logout</a>
+          </div>
+        </div>
+      </div>
     </nav>
   </header>
   <section class="hero">
-    <img src="../docs/images/header.jpg" alt="Een diverse groep mensen die samenwerken aan toegankelijke oplossingen" class="hero-image">
+    <img src="{{ url_for('static', filename='images/header.jpg') }}" alt="Een diverse groep mensen die samenwerken aan toegankelijke oplossingen" class="hero-image">
     <div class="hero-overlay">
       <h1>Welkom bij de Accessibility Hub</h1>
       <p>Een plek waar inclusiviteit en toegankelijkheid samenkomen.</p>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Choice</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="{{ url_for('index') }}" class="navbar-brand">
+                <img src="{{ url_for('static', filename='images/testlogo.png') }}" alt="Logo" />
+            </a>
+        </nav>
+    </header>
+    <section class="login-choice">
+        <h1>Choose Your Login Type</h1>
+        <div class="choices">
+            <a href="{{ url_for('login') }}" class="btn">Login as Admin</a>
+            <a href="{{ url_for('login') }}" class="btn">Login as Organization</a>
+        </div>
+    </section>
+</body>
+</html>
