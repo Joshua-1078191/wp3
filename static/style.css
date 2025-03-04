@@ -1,35 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-
 body {
   font-family: 'Roboto', sans-serif;
-  background-color: #f8f8f8; 
+  background-color: #f9f9fb;
   color: #333;
 }
 
-
 .navbar {
-  background-color: #333;      
-  color: #fff;                
+  background-color: #04293A;
+  color: #fff;
   padding: 15px;
   display: flex;
   align-items: center;
-  justify-content: space-between; 
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
 
 .navbar-brand {
   font-weight: bold;
   display: flex;
   align-items: center;
-  margin-left: 10px; 
+  margin-left: 10px;
   text-decoration: none;
   color: #fff;
 }
@@ -38,6 +35,7 @@ body {
   width: 40px;
   height: 40px;
   margin-right: 10px;
+  border-radius: 50%;
 }
 
 .navbar-nav {
@@ -47,21 +45,21 @@ body {
 }
 
 .navbar-nav li {
-  margin-left: 20px; 
+  margin-left: 20px;
 }
 
 .nav-link {
   text-decoration: none;
   color: #fff;
-  padding: 10px 15px; 
+  padding: 10px 15px;
+  border-radius: 20px;
   transition: background-color 0.3s ease, color 0.3s ease;
-  border-radius: 5px; 
 }
 
-
 .nav-link:hover {
-  color: #fff; 
-  background-color: rgba(0, 119, 255, 0.2); 
+  background-color: #064663;
+}
+
 .hero {
   position: relative;
   width: 100%;
@@ -116,26 +114,36 @@ body {
   animation: fadeInDown 1.2s ease forwards;
 }
 
-h4, h5 {
+.cta-button {
+  background-color: #F4D35E;
+  color: #333;
+  padding: 12px 25px;
+  text-decoration: none;
+  border-radius: 30px;
   font-weight: bold;
+  transition: all 0.3s ease;
+  animation: fadeInDown 1.4s ease forwards;
 }
 
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 1rem auto;
-  background: #fff;
+.cta-button:hover {
+  background-color: #EE964B;
+  transform: scale(1.05);
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 0.75rem;
-  text-align: left;
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 2rem auto;
 }
 
-tbody tr:nth-child(even) {
-  background-color: #f1f1f1;
+.rounded-block {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
 .benefits {
   margin-bottom: 2rem;
 }
@@ -146,13 +154,6 @@ tbody tr:nth-child(even) {
   gap: 20px;
 }
 
-button {
-  background-color: #333;
-  color: #fff;
-  border: none;
-  padding: 10px 15px;
-  cursor: pointer;
-  border-radius: 5px;
 .benefit-item {
   background-color: #fff;
   padding: 1.5rem;
@@ -163,19 +164,49 @@ button {
   margin-bottom: 0.8rem;
 }
 
+.animate-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-button:hover {
-  background-color: #555;
+.animate-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.15);
 }
 
+.call-to-action {
+  text-align: center;
+}
+
+.call-to-action p {
+  max-width: 600px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.call-to-action .cta-button {
+  margin-top: 1rem;
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 footer {
   text-align: center;
   padding: 1rem;
   background-color: #eee;
   margin-top: 2rem;
-}.modal {
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+}
+
 .hero-small {
   height: 300px;
 }
@@ -183,6 +214,36 @@ footer {
 .hero-overlay-small {
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
+}
+
+.table-container {
+  border-radius: 16px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.table-container table {
+  border-radius: 16px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table-container table thead tr {
+  background-color: #f0f0f0;
+}
+
+.table-container table th, 
+.table-container table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.table-container table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-container table tbody tr:hover {
+  background-color: #f5f5f5;
 }
 
 .modal {
@@ -205,6 +266,44 @@ footer {
   position: relative;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
+
+.close {
+  color: #999;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.close:hover {
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.form-group .req {
+  color: red;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 .modal-button {
   background-color: #F4D35E;
   color: #333;
