@@ -10,17 +10,23 @@
   <header>
     <nav class="navbar">
       <a href="index.html" class="navbar-brand">
-        <img src="..\docs\images\testlogo.png" alt="Logo" />
+        <img src="../docs/images/testlogo.png" alt="Logo" />
         Accessibility Hub
       </a>
-      
       <ul class="navbar-nav">
         <li><a href="index.html" class="nav-link">Home</a></li>
-        <li><a href="onderzoeken.html" class="nav-link">Onderzoeken</a></li>
-        <li><a href="account.html" class="nav-link" aria-current="page">Account</a></li>
+        <li><a href="onderzoeken.html" class="nav-link" aria-current="page">Onderzoeken</a></li>
+        <li><a href="account.html" class="nav-link">Account</a></li>
       </ul>
     </nav>
   </header>
+  <section class="hero hero-small">
+    <img src="../docs/images/onderzoek.jpg" alt="Een diverse groep mensen" class="hero-image">
+    <div class="hero-overlay hero-overlay-small">
+      <h1>Onderzoeken</h1>
+      <p>Bekijk hier lopende en nieuwe onderzoeken</p>
+    </div>
+  </section>
   <main class="container">
     <section class="onderzoeken-lijst rounded-block">
       <h2>Beschikbare Onderzoeken</h2>
@@ -41,10 +47,31 @@
         </table>
       </div>
       <button type="button" id="btnNieuwOnderzoek" class="cta-button" style="margin-top: 1.5rem;">
+        Nieuw onderzoek
+      </button>
+    </section>
   </main>
-
+  <div id="modalNieuwOnderzoek" class="modal">
+    <div class="modal-content" role="dialog" aria-labelledby="modalTitel" aria-modal="true">
+      <span class="close" id="closeModal" aria-label="Sluit">&times;</span>
+      <h2 id="modalTitel">Nieuw Onderzoek</h2>
+      <form id="formNieuwOnderzoek">
+        <div class="form-group">
+          <label for="naamOnderzoek">Naam van het onderzoek <span class="req">*</span></label>
+          <input type="text" id="naamOnderzoek" required />
+        </div>
+        <div class="form-group">
+          <label for="beschrijvingOnderzoek">Beschrijving van het onderzoek <span class="req">*</span></label>
+          <textarea id="beschrijvingOnderzoek" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="modal-button">Verstuur</button>
+      </form>
+    </div>
+  </div>
+  <div id="succesPopup" class="succes-popup" aria-live="polite"></div>
   <footer>
     <p>&copy; 2025 Accessibility Hub</p>
   </footer>
+  <script src="../static/nieuwOnderzoek.js"></script>
 </body>
 </html>
