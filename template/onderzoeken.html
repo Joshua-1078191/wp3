@@ -21,37 +21,26 @@
       </ul>
     </nav>
   </header>
-
-  <main>
-    <h1>Onderzoeken</h1>
-    <table>
-      <thead>
-        <tr>
-          <th>Onderzoeken</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>trein onderzoek</td>
-          <td>bezig</td>
-        </tr>
-        <tr>
-          <td>museum onderzoek</td>
-          <td>open</td>
-        </tr>
-        <tr>
-          <td>trein onderzoek</td>
-          <td>bezig</td>
-        </tr>
-        <tr>
-          <td>museum onderzoek</td>
-          <td>open</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <button type="button">nieuw onderzoek</button>
+  <main class="container">
+    <section class="onderzoeken-lijst rounded-block">
+      <h2>Beschikbare Onderzoeken</h2>
+      <div class="table-container animate-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Onderzoek</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Trein onderzoek</td><td>Bezig</td></tr>
+            <tr><td>Museum onderzoek</td><td>Open</td></tr>
+            <tr><td>Trein onderzoek</td><td>Bezig</td></tr>
+            <tr><td>Museum onderzoek</td><td>Open</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" id="btnNieuwOnderzoek" class="cta-button" style="margin-top: 1.5rem;">
   </main>
 
   <footer>
