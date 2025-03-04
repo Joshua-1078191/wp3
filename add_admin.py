@@ -1,4 +1,4 @@
-from lib.database_generator import db_session, Beheerder
+from lib.database_generator import db_session, Beheerder, Organisatie
 from werkzeug.security import generate_password_hash
 
 # Create a new admin user
@@ -14,3 +14,4 @@ db_session.add(admin)
 db_session.commit()
 
 print("Dummy admin user added successfully!")
+
