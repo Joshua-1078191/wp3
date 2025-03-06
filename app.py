@@ -114,7 +114,15 @@ def accounts():
         return redirect(url_for('login'))
     admin_name = get_admin_name()
     # Add logic to retrieve and display the accounts information
-    return render_template('admin/table.html', admin_name=admin_name)
+    return render_template('admin/accounts.html', admin_name=admin_name)
+
+@app.route('/pending')
+def accounts():
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login'))
+    admin_name = get_admin_name()
+    # Add logic to retrieve and display the accounts information
+    return render_template('admin/pending.html', admin_name=admin_name)
 
 @app.route('/logout')
 def logout():
