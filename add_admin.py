@@ -3,9 +3,9 @@ from werkzeug.security import generate_password_hash
 
 # Create a new admin user
 admin = Beheerder(
-    voornaam='Admin',
-    achternaam='User',
-    emailadres='admin@example.com',
+    voornaam='test',
+    achternaam='jo',
+    emailadres='test@test.com',
     wachtwoord_hash=generate_password_hash('password123')
 )
 

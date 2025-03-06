@@ -52,4 +52,4 @@ def register():
         db_session.commit()
 
         return redirect(url_for('register_bp.register'))
-    return render_template('register.html')
+    return render_template('user/register.html')

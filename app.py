@@ -17,7 +17,7 @@ app.register_blueprint(login_bp)
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('user/home.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -27,40 +27,42 @@ def login():
             return redirect(url_for('admin_login'))
         elif user_type == 'organization':
             return redirect(url_for('organization_login'))
-    return render_template('login_choice.html')
+    return render_template('user/login_choice.html')
 
-@app.route('/admin_login', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        # Check credentials
-        admin = db_session.query(Beheerder).filter_by(emailadres=email).first()
-        if admin and check_password_hash(admin.wachtwoord_hash, password):
-            session['user_id'] = admin.id
-            session['user_type'] = 'admin'
-            return redirect(url_for('index'))
-    return render_template('admin_login.html')
-
-@app.route('/organization_login', methods=['GET', 'POST'])
-def organization_login():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        api_key = request.form.get('api_key')
-        organization = db_session.query(Organisatie).filter_by(naam=name).first()
-        if organization and organization.api_key == api_key:
-            session['user_id'] = organization.id
-            session['user_type'] = 'organization'
-            return redirect(url_for('index'))
-    return render_template('organization_login.html')
 
 @app.route('/index')
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     user_type = session.get('user_type')
-    return render_template('index.html', user_type=user_type)
+    if user_type == 'admin':
+        user = db_session.query(Beheerder).filter_by(id=session['user_id']).first()
+        session_name = user.voornaam + ' ' + user.achternaam
+    elif user_type == 'organization':
+        user = db_session.query(Organisatie).filter_by(id=session['user_id']).first()
+        session_name = user.naam
+    return render_template('user/user_index.html', user_type=user_type, session_name=session_name)
+
+@app.route('/admin_index')
+def admin_index():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user_type = session.get('user_type')
+    return render_template('admin/admin_index.html', user_type=user_type)
+
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    # Add logic to retrieve and display the profile information
+    return render_template('admin/profile.html')
+
+@app.route('/accounts')
+def accounts():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    # Add logic to retrieve and display the accounts information
+    return render_template('admin/table.html')
 
 @app.route('/logout')
 def logout():

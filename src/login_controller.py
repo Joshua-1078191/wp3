@@ -13,7 +13,7 @@ def admin_login():
     if admin and check_password_hash(admin.wachtwoord_hash, password):
         session['user_id'] = admin.id
         session['user_type'] = 'admin'
-        return redirect(url_for('index'))
+        return redirect(url_for('admin_index'))
     return redirect(url_for('login'))
 
 @login_bp.route('/organization_login', methods=['POST'])
