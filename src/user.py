@@ -24,8 +24,22 @@ class UserLogin:
             db_session.commit()
             return api_key
         return None
+    def ervaringsdeskundige_login(self, api_key, phone_number, email):
+        ervaringsdeskundige = db_session.query(Ervaringsdeskundige).filter_by(
+            emailadres=email,
+            telefoonnummer=phone_number
+        ).first()
+        
+        if ervaringsdeskundige and ervaringsdeskundige.api_key == api_key:
+            if ervaringsdeskundige.accepteerd:  # Changed from is_approved to accepteerd
+                full_name = f"{ervaringsdeskundige.voornaam} {ervaringsdeskundige.achternaam}"
+                return ervaringsdeskundige.id, 'ervaringsdeskundige', full_name
+            else:
+                return None, 'not_approved', None
+        return None, None, None
 
-from lib.database_generator import db_session, Beheerder, Organisatie, Ervaringsdeskundige
+
+
 class UserProfile:
     def get_admin_profile(self, user_id):
         return db_session.query(Beheerder).filter_by(id=user_id).first()
@@ -56,7 +70,29 @@ class UserRegistration:
             naam_toezichthouder=form_data.get('naam_toezichthouder'),
             email_toezichthouder=form_data.get('email_toezichthouder'),
             telefoon_toezichthouder=form_data.get('telefoon_toezichthouder'),
-            beperking_id=form_data.get('beperking_id', 1)
+            beperking_id=form_data.get('beperking_id', 1),
+            accepteerd = None,
+            api_key= None
         )
         db_session.add(new_ervaringsdeskundige)
         db_session.commit()
+
+class AdminActions:
+    def approve_ervaringsdeskundige(self, user_id):
+        user = db_session.query(Ervaringsdeskundige).get(user_id)
+        if user:
+            user.accepteerd = True
+            user.api_key = secrets.token_hex(32)
+            db_session.commit()
+            return True
+        return False
+    def disapprove_ervaringsdeskundige(self, user_id):
+        ervaringsdeskundige = db_session.query(Ervaringsdeskundige).filter_by(id=user_id).first()
+        if ervaringsdeskundige:
+            ervaringsdeskundige.accepteerd = False
+            db_session.commit()
+            return True
+        return False
+
+    def get_pending_ervaringsdeskundigen(self):
+        return db_session.query(Ervaringsdeskundige).filter_by(accepteerd=None).all()

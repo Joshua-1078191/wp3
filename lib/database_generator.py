@@ -16,7 +16,7 @@ class Organisatie(Base):
     contactpersoon = Column(String, nullable=True)
     telefoonnummer = Column(String, nullable=True)
     overige_details = Column(String, nullable=True)
-    api_key = Column(String, nullable=True)
+    api_key = Column(String(32), unique=True, nullable=False)
     onderzoeken = relationship("Onderzoek", back_populates="organisatie")
 
 
@@ -108,7 +108,8 @@ class Ervaringsdeskundige(Base):
     type_onderzoek_id = Column(Integer, ForeignKey('type_onderzoek.id'), nullable=True)
     beperking_id = Column(Integer, ForeignKey('beperkingen.id'), nullable=False)
     bijzonderheden_beschikbaarheid = Column(String, nullable=True)
-
+    accepteerd = Column(Boolean, nullable=True)
+    api_key = Column(String(32), unique=True, nullable=False)
     # Relationships
     beperking = relationship("Beperking", back_populates="ervaringsdeskundigen")
     type_onderzoek = relationship("TypeOnderzoek", back_populates="ervaringsdeskundigen")

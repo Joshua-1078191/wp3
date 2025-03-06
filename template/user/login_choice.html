@@ -1,12 +1,4 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Choice</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+{% include 'user/header.html' %}
 <body>
     <header>
         <nav class="navbar">
@@ -20,6 +12,7 @@
         <div class="choices">
             <a href="#" class="btn btn-admin">Login as Admin</a>
             <a href="#" class="btn btn-organization">Login as Organization</a>
+            <a href="#" class="btn btn-ervaringsdeskundige">Login as Ervaringsdeskundige</a>
         </div>
         <button onclick="location.href='{{ url_for('home') }}'" class="btn">Back</button>
     </section>
@@ -58,6 +51,21 @@
                         </div>
                     </div>
                 `;
+            } else if (userType === 'ervaringsdeskundige') {
+                loginFormHtml = `
+                    <div class="popup">
+                        <div class="popup-content">
+                            <span class="close">&times;</span>
+                            <h2>Ervaringsdeskundige Login</h2>
+                            <form action="{{ url_for('ervaringsdeskundige_login') }}" method="post">
+                                <input type="text" name="api_key" placeholder="API Key" required>
+                                <input type="tel" name="phone_number" placeholder="Phone Number" required>
+                                <input type="email" name="email" placeholder="Email" required>
+                                <button type="submit">Login as Ervaringsdeskundige</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
             }
             document.body.insertAdjacentHTML('beforeend', loginFormHtml);
             const popup = document.querySelector('.popup');
@@ -70,6 +78,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const adminButton = document.querySelector('.btn-admin');
             const organizationButton = document.querySelector('.btn-organization');
+            const ervaringsdeskundigeButton = document.querySelector('.btn-ervaringsdeskundige');
             adminButton.addEventListener('click', function(event) {
                 event.preventDefault();
                 showLoginForm('admin');
@@ -78,7 +87,12 @@
                 event.preventDefault();
                 showLoginForm('organization');
             });
+            ervaringsdeskundigeButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                showLoginForm('ervaringsdeskundige');
+            });
         });
     </script>
 </body>
 </html>
+

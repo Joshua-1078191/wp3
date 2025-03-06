@@ -1,7 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, request, session, jsonify
+from flask import Flask, render_template, redirect, url_for, request, session, jsonify, flash
 from sqlalchemy.orm import sessionmaker
 from lib.database_generator import engine, Organisatie, Beheerder, Ervaringsdeskundige
-from src.user import UserLogin, UserRegistration, UserProfile
+from src.user import UserLogin, UserRegistration, UserProfile, AdminActions
 from werkzeug.security import check_password_hash
 
 app = Flask(__name__, template_folder='template')
@@ -15,6 +15,8 @@ user_login = UserLogin()
 user_registration = UserRegistration()
 user_profile = UserProfile()
 
+admin_actions = AdminActions()
+
 @app.route('/')
 def home():
     return render_template('user/home.html')
@@ -27,16 +29,21 @@ def login():
             return redirect(url_for('admin_login'))
         elif user_type == 'organization':
             return redirect(url_for('organization_login'))
+        elif user_type == 'ervaringsdeskundige':
+            return redirect(url_for('ervaringsdeskundige_login'))
     return render_template('user/login_choice.html')
 
 @app.route('/admin_login', methods=['POST'])
 def admin_login():
     email = request.form.get('email')
     password = request.form.get('password')
+    user_login = UserLogin()
     user_id, user_type = user_login.admin_login(email, password)
     if user_id:
         session['user_id'] = user_id
         session['user_type'] = user_type
+        admin = db_session.query(Beheerder).get(user_id)
+        session['admin_name'] = f"{admin.voornaam} {admin.achternaam}"
         return redirect(url_for('admin_index'))
     return redirect(url_for('login'))
 
@@ -44,11 +51,32 @@ def admin_login():
 def organization_login():
     name = request.form.get('name')
     api_key = request.form.get('api_key')
-    user_id, user_type = user_login.organization_login(name, api_key)
+    user_login = UserLogin()
+    organization_id, user_type = user_login.organization_login(name, api_key)
+    if organization_id:
+        session['user_id'] = organization_id
+        session['user_type'] = user_type
+        organization = db_session.query(Organisatie).get(organization_id)
+        session['organization'] = {'naam': organization.naam}
+        return redirect(url_for('user_index'))
+    return redirect(url_for('login'))
+
+@app.route('/ervaringsdeskundige_login', methods=['POST'])
+def ervaringsdeskundige_login():
+    api_key = request.form.get('api_key')
+    phone_number = request.form.get('phone_number')
+    email = request.form.get('email')
+    
+    user_id, user_type, full_name = user_login.ervaringsdeskundige_login(api_key, phone_number, email)
+    
     if user_id:
         session['user_id'] = user_id
-        session['user_type'] = user_type
-        return redirect(url_for('index'))
+        session['user_type'] = 'ervaringsdeskundige'
+        return redirect(url_for('user_index'))
+    elif user_type == 'not_approved':
+        flash('Your account is pending approval. Please wait for admin confirmation.', 'warning')
+    else:
+        flash('Invalid credentials. Please check your API key, phone number, and email.', 'error')
     return redirect(url_for('login'))
 
 @app.route('/admin/generate_api_key', methods=['POST'])
@@ -67,21 +95,39 @@ def register():
     if request.method == 'POST':
         form_data = request.form
         user_registration.register(form_data)
-        return redirect(url_for('register'))
+        return redirect(url_for('home'))
     return render_template('user/register.html')
 
-@app.route('/index')
-def index():
+@app.route('/user/user_index')
+def user_index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+
     user_type = session.get('user_type')
+    user_info = {}
+
     if user_type == 'admin':
-        user = db_session.query(Beheerder).filter_by(id=session['user_id']).first()
-        session_name = user.voornaam + ' ' + user.achternaam
+        admin = db_session.query(Beheerder).filter_by(id=session['user_id']).first()
+        user_info = {
+            'type': 'Admin',
+            'name': f"{admin.voornaam} {admin.achternaam}"
+        }
     elif user_type == 'organization':
-        user = db_session.query(Organisatie).filter_by(id=session['user_id']).first()
-        session_name = user.naam
-    return render_template('user/user_index.html', user_type=user_type, session_name=session_name)
+        org = db_session.query(Organisatie).filter_by(id=session['user_id']).first()
+        user_info = {
+            'type': 'Organisatie',
+            'name': org.naam
+        }
+    elif user_type == 'ervaringsdeskundige':
+        erv = db_session.query(Ervaringsdeskundige).filter_by(id=session['user_id']).first()
+        user_info = {
+            'type': 'Ervaringsdeskundige',
+            'name': f"{erv.voornaam} {erv.achternaam}"
+        }
+    else:
+        return redirect(url_for('login'))
+
+    return render_template('user/user_index.html', user_info=user_info)
 
 @app.route('/admin_index')
 def admin_index():
@@ -116,13 +162,6 @@ def accounts():
     # Add logic to retrieve and display the accounts information
     return render_template('admin/accounts.html', admin_name=admin_name)
 
-@app.route('/pending')
-def accounts():
-    if 'user_id' not in session or session.get('user_type') != 'admin':
-        return redirect(url_for('login'))
-    admin_name = get_admin_name()
-    # Add logic to retrieve and display the accounts information
-    return render_template('admin/pending.html', admin_name=admin_name)
 
 @app.route('/logout')
 def logout():
@@ -139,6 +178,34 @@ def get_admin_name():
         admin = db_session.query(Beheerder).filter_by(id=session['user_id']).first()
         return f"{admin.voornaam} {admin.achternaam}"
     return None
+
+@app.route('/pending', methods=['GET', 'POST'])
+@app.route('/pending', methods=['GET', 'POST'])
+def pending():
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login'))
+
+    admin_name = get_admin_name()
+
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        action = request.form.get('action')
+
+        if action == 'approve':
+            if admin_actions.approve_ervaringsdeskundige(user_id):
+                flash('Ervaringsdeskundige approved successfully', 'success')
+            else:
+                flash('Failed to approve Ervaringsdeskundige', 'error')
+        elif action == 'disapprove':
+            if admin_actions.disapprove_ervaringsdeskundige(user_id):
+                flash('Ervaringsdeskundige disapproved successfully', 'success')
+            else:
+                flash('Failed to disapprove Ervaringsdeskundige', 'error')
+        return redirect(url_for('pending'))
+
+    pending_users = admin_actions.get_pending_ervaringsdeskundigen()
+    return render_template('admin/pending.html', admin_name=admin_name, pending_users=pending_users)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

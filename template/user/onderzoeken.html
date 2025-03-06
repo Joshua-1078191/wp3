@@ -1,26 +1,6 @@
-
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Accessibility Hub - Onderzoeken</title>
-  <link rel="stylesheet" href="../../static/style.css" />
-</head>
+{% include 'user/header.html' %}
 <body>
-  <header>
-    <nav class="navbar">
-      <a href="user/user_index.html" class="navbar-brand">
-        <img src="../../docs/images/testlogo.png" alt="Logo" />
-        Accessibility Hub
-      </a>
-      <ul class="navbar-nav">
-        <li><a href="user/user_index.html" class="nav-link">Home</a></li>
-        <li><a href="user/onderzoeken.html" class="nav-link" aria-current="page">Onderzoeken</a></li>
-        <li><a href="user/account.html" class="nav-link">Account</a></li>
-      </ul>
-    </nav>
-  </header>
+  {% include 'user/navbar.html' %}
   <section class="hero hero-small">
     <img src="../../docs/images/onderzoek.jpg" alt="Een diverse groep mensen" class="hero-image">
     <div class="hero-overlay hero-overlay-small">
