@@ -1,0 +1,62 @@
+from werkzeug.security import check_password_hash, generate_password_hash
+from lib.database_generator import db_session, Beheerder, Organisatie, Ervaringsdeskundige
+import secrets
+from datetime import datetime
+
+class UserLogin:
+    def admin_login(self, email, password):
+        admin = db_session.query(Beheerder).filter_by(emailadres=email).first()
+        if admin and check_password_hash(admin.wachtwoord_hash, password):
+            return admin.id, 'admin'
+        return None, None
+
+    def organization_login(self, name, api_key):
+        organization = db_session.query(Organisatie).filter_by(naam=name).first()
+        if organization and organization.api_key == api_key:
+            return organization.id, 'organization'
+        return None, None
+
+    def generate_api_key(self, name):
+        organization = db_session.query(Organisatie).filter_by(naam=name).first()
+        if organization:
+            api_key = secrets.token_hex(16)
+            organization.api_key = api_key
+            db_session.commit()
+            return api_key
+        return None
+
+from lib.database_generator import db_session, Beheerder, Organisatie, Ervaringsdeskundige
+class UserProfile:
+    def get_admin_profile(self, user_id):
+        return db_session.query(Beheerder).filter_by(id=user_id).first()
+
+    def update_admin_profile(self, user_id, form_data):
+        admin = db_session.query(Beheerder).filter_by(id=user_id).first()
+        if admin:
+            admin.voornaam = form_data.get('voornaam', admin.voornaam)
+            admin.achternaam = form_data.get('achternaam', admin.achternaam)
+            admin.emailadres = form_data.get('emailadres', admin.emailadres)
+            db_session.commit()
+
+class UserRegistration:
+    def register(self, form_data):
+        new_ervaringsdeskundige = Ervaringsdeskundige(
+            voornaam=form_data['voornaam'],
+            achternaam=form_data['achternaam'],
+            postcode=form_data['postcode'],
+            geslacht=form_data['geslacht'],
+            emailadres=form_data['emailadres'],
+            telefoonnummer=form_data['telefoonnummer'],
+            geboortedatum=datetime.strptime(form_data['geboortedatum'], '%Y-%m-%d').date(),
+            gebruikte_hulpmiddelen=form_data.get('gebruikte_hulpmiddelen'),
+            kort_voorstellen=form_data.get('kort_voorstellen'),
+            bijzonderheden=form_data.get('bijzonderheden'),
+            akkoord_voorwaarden=form_data.get('akkoord_voorwaarden') == 'on',
+            toezichthouder=form_data.get('toezichthouder') == 'on',
+            naam_toezichthouder=form_data.get('naam_toezichthouder'),
+            email_toezichthouder=form_data.get('email_toezichthouder'),
+            telefoon_toezichthouder=form_data.get('telefoon_toezichthouder'),
+            beperking_id=form_data.get('beperking_id', 1)
+        )
+        db_session.add(new_ervaringsdeskundige)
+        db_session.commit()
