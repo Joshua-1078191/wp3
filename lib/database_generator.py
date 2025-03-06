@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship, declarative_base, sessionmaker
 from datetime import datetime
+import secrets
 
 Base = declarative_base()
 
@@ -9,8 +10,7 @@ class Organisatie(Base):
     __tablename__ = 'organisatie'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    naam = Column(String, nullable=False)
-    type = Column(Boolean, nullable=False)  # Assuming type as a boolean, change if needed
+    naam = Column(String, nullable=False, unique=True)
     website = Column(String, nullable=True)
     beschrijving = Column(String, nullable=True)
     contactpersoon = Column(String, nullable=True)
@@ -93,8 +93,8 @@ class Ervaringsdeskundige(Base):
     achternaam = Column(String, nullable=False)
     postcode = Column(String, nullable=False)
     geslacht = Column(String, nullable=False)
-    emailadres = Column(String, nullable=False)
-    telefoonnummer = Column(String, nullable=True)
+    emailadres = Column(String, nullable=False, unique=True)
+    telefoonnummer = Column(String, nullable=True, unique=True)
     geboortedatum = Column(Date, nullable=False)
     gebruikte_hulpmiddelen = Column(String, nullable=True)
     kort_voorstellen = Column(String, nullable=True)
@@ -109,7 +109,7 @@ class Ervaringsdeskundige(Base):
     beperking_id = Column(Integer, ForeignKey('beperkingen.id'), nullable=False)
     bijzonderheden_beschikbaarheid = Column(String, nullable=True)
     accepteerd = Column(Boolean, nullable=True)
-    api_key = Column(String(32), unique=True, nullable=False)
+    api_key = Column(String(32), nullable=False, unique=True, default=lambda: secrets.token_hex(16))
     # Relationships
     beperking = relationship("Beperking", back_populates="ervaringsdeskundigen")
     type_onderzoek = relationship("TypeOnderzoek", back_populates="ervaringsdeskundigen")

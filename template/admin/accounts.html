@@ -1,69 +1,132 @@
-
 {% include 'admin/header.html' %}
 <body id="page-top">
     <div id="wrapper">
         {% include 'admin/navbar.html' %}
-        <div class="d-flex flex-column" id="content-wrapper">
-            <div id="content">
-                <div class="container-fluid">
-                    <h3 class="text-dark mb-4">Accounts</h3>
-                    <div class="card shadow">
-                        <div class="card-header py-3">
-                            <p class="text-primary m-0 fw-bold">Accounts</p>
+        <div class="container-fluid">
+            <h3 class="text-dark mb-4">Accounts</h3>
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <p class="text-primary m-0 font-weight-bold">Account Management</p>
+                    <a href="{{ url_for('add_organization') }}" class="btn btn-primary" type="button">Add New Organization</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 text-nowrap">
+                            <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">
+                                <label>Show
+                                    <select class="form-control form-control-sm custom-select custom-select-sm">
+                                        <option value="10" selected="">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select> entries
+                                </label>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 text-nowrap">
-                                    <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable"><label class="form-label">Show&nbsp;<select class="d-inline-block form-select form-select-sm">
-                                                <option value="10" selected="">10</option>
-                                                <option value="25">25</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                            </select>&nbsp;</label></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="text-md-end dataTables_filter" id="dataTable_filter"><label class="form-label"><input type="search" class="form-control form-control-sm" aria-controls="dataTable" placeholder="Search"></label></div>
-                                </div>
-                            </div>
-                            <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
-                                <table class="table my-0" id="dataTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Type</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                    <tfoot>
-                                        <tr></tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 align-self-center">
-                                    <p id="dataTable_info" class="dataTables_info" role="status" aria-live="polite">Showing 1 to 10 of 27</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <nav class="d-lg-flex justify-content-lg-end dataTables_paginate paging_simple_numbers">
-                                        <ul class="pagination">
-                                            <li class="page-item disabled"><a class="page-link" aria-label="Previous" href="#"><span aria-hidden="true">«</span></a></li>
-                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                            <li class="page-item"><a class="page-link" aria-label="Next" href="#"><span aria-hidden="true">»</span></a></li>
-                                        </ul>
-                                    </nav>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="text-md-right dataTables_filter" id="dataTable_filter">
+                                <form action="{{ url_for('accounts') }}" method="get">
+                                    <label>
+                                        <input type="search" class="form-control form-control-sm" aria-controls="dataTable" placeholder="Search" name="search" value="{{ search_query }}">
+                                    </label>
+                                    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                                </form>
                             </div>
                         </div>
                     </div>
+                    <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
+                        <table class="table my-0" id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Email</th>
+                                    <th>API key</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ervaringsdeskundige in ervaringsdeskundigen %}
+                                <tr>
+                                    <td>{{ ervaringsdeskundige.voornaam }} {{ ervaringsdeskundige.achternaam }}</td>
+                                    <td>Expert</td>
+                                    <td>{{ ervaringsdeskundige.emailadres }}</td>
+                                    <td>
+                                        {% if ervaringsdeskundige.api_key %}
+                                            <span class="api-key">{{ ervaringsdeskundige.api_key }}</span>
+                                        {% else %}
+                                            <span>No API key</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button onclick="generateApiKey('{{ ervaringsdeskundige.id }}', 'ervaringsdeskundige')" class="btn btn-primary btn-sm">Generate API Key</button>
+                                        <a href="{{ url_for('edit_account', account_type='ervaringsdeskundige', account_id=ervaringsdeskundige.id) }}" class="btn btn-primary btn-sm">Edit</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% for beheerder in beheerders %}
+                                <tr>
+                                    <td>{{ beheerder.voornaam }} {{ beheerder.achternaam }}</td>
+                                    <td>Admin</td>
+                                    <td>{{ beheerder.emailadres }}</td>
+                                    <td>N/A</td>
+                                    
+
+                                </tr>
+                                {% endfor %}
+                                {% for organisatie in organisaties %}
+                                <tr>
+                                    <td>{{ organisatie.naam }}</td>
+                                    <td>Organization</td>
+                                    <td>{{ organisatie.emailadres }}</td>
+                                    <td>
+                                        {% if organisatie.api_key %}
+                                            <span class="api-key">{{ organisatie.api_key }}</span>
+                                        {% else %}
+                                            <span>No API key</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                         <button onclick="generateApiKey('{{ organisatie.id }}', 'organization')" class="btn btn-primary btn-sm">Generate API Key</button>
+                                         <a href="{{ url_for('edit_account', account_type='organization', account_id=organisatie.id) }}" class="btn btn-primary btn-sm">Edit</a>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            {% include 'admin/footer.html' %}
-            <script src="static/bootstrap/js/bootstrap.min.js"></script>
-            <script src="static/js/theme.js"></script>
-        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+        </div>
     </div>
-</body>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>   
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script>
+    function generateApiKey(accountId, accountType) {
+        fetch('/generate_api_key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `account_id=${accountId}&account_type=${accountType}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`New API Key: ${data.api_key}`);
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while generating the API key.');
+        });
+    }
+
+
+    </script>
+</body>
 </html>
+

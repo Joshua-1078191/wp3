@@ -3,6 +3,10 @@ from sqlalchemy.orm import sessionmaker
 from lib.database_generator import engine, Organisatie, Beheerder, Ervaringsdeskundige
 from src.user import UserLogin, UserRegistration, UserProfile, AdminActions
 from werkzeug.security import check_password_hash
+import random
+import string
+import secrets
+from datetime import datetime
 
 app = Flask(__name__, template_folder='template')
 app.secret_key = 'your_secret_key'
@@ -79,16 +83,6 @@ def ervaringsdeskundige_login():
         flash('Invalid credentials. Please check your API key, phone number, and email.', 'error')
     return redirect(url_for('login'))
 
-@app.route('/admin/generate_api_key', methods=['POST'])
-def admin_generate_api_key():
-    if 'user_id' not in session or session.get('user_type') != 'admin':
-        return 'Unauthorized', 403
-
-    name = request.form.get('name')
-    api_key = user_login.generate_api_key(name)
-    if api_key:
-        return f'API key generated for {name}: {api_key}', 200
-    return 'Organization not found', 404
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -158,9 +152,43 @@ def profile():
 def accounts():
     if 'user_id' not in session or session.get('user_type') != 'admin':
         return redirect(url_for('login'))
+
     admin_name = get_admin_name()
-    # Add logic to retrieve and display the accounts information
-    return render_template('admin/accounts.html', admin_name=admin_name)
+    ervaringsdeskundigen = db_session.query(Ervaringsdeskundige).filter_by(accepteerd=True).all()
+    beheerders = db_session.query(Beheerder).all()
+    organisaties = db_session.query(Organisatie).all()
+
+    return render_template('admin/accounts.html', 
+                           admin_name=admin_name,
+                           ervaringsdeskundigen=ervaringsdeskundigen, 
+                           beheerders=beheerders, 
+                           organisaties=organisaties)
+
+
+
+import secrets  # Add this import at the top of your file
+@app.route('/generate_api_key', methods=['POST'])
+def generate_api_key():
+    account_id = request.form.get('account_id')
+    account_type = request.form.get('account_type')
+
+    if account_type == 'organization':
+        account = db_session.query(Organisatie).get(account_id)
+    elif account_type == 'ervaringsdeskundige':
+        account = db_session.query(Ervaringsdeskundige).get(account_id)
+    else:
+        return jsonify({'success': False, 'message': 'Invalid account type'})
+
+    if account:
+        new_api_key = secrets.token_hex(16)
+        account.api_key = new_api_key
+        db_session.commit()
+        return jsonify({'success': True, 'api_key': new_api_key})
+    else:
+        return jsonify({'success': False, 'message': 'Account not found'})
+
+
+
 
 
 @app.route('/logout')
@@ -179,7 +207,6 @@ def get_admin_name():
         return f"{admin.voornaam} {admin.achternaam}"
     return None
 
-@app.route('/pending', methods=['GET', 'POST'])
 @app.route('/pending', methods=['GET', 'POST'])
 def pending():
     if 'user_id' not in session or session.get('user_type') != 'admin':
@@ -205,6 +232,117 @@ def pending():
 
     pending_users = admin_actions.get_pending_ervaringsdeskundigen()
     return render_template('admin/pending.html', admin_name=admin_name, pending_users=pending_users)
+
+
+def admin_accounts():
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login'))
+
+    admin_name = get_admin_name()
+    ervaringsdeskundigen = db_session.query(Ervaringsdeskundige).all()
+    beheerders = db_session.query(Beheerder).all()
+    organisaties = db_session.query(Organisatie).all()
+
+    return render_template('admin/accounts.html', 
+                           admin_name=admin_name, 
+                           ervaringsdeskundigen=ervaringsdeskundigen,
+                           beheerders=beheerders,
+                           organisaties=organisaties)
+
+
+
+@app.route('/add_organization', methods=['GET', 'POST'])
+def add_organization():
+    if request.method == 'POST':
+        new_organization = Organisatie(
+            naam=request.form['naam'],
+            website=request.form['website'],
+            beschrijving=request.form['beschrijving'],
+            contactpersoon=request.form['contactpersoon'],
+            telefoonnummer=request.form['telefoonnummer'],
+            overige_details=request.form['overige_details'],
+            api_key=secrets.token_hex(16)
+        )
+
+        try:
+            db_session.add(new_organization)
+            db_session.commit()
+            flash('Organization added successfully!', 'success')
+            return redirect(url_for('admin_index'))
+        except Exception as e:
+            db_session.rollback()
+            flash(f'Error adding organization: {str(e)}', 'error')
+
+    return render_template('admin/add_organization.html')
+
+
+@app.route('/get_account/<account_type>/<int:account_id>')
+def get_account(account_type, account_id):
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    if account_type == 'organization':
+        account = db_session.query(Organisatie).filter_by(id=account_id).first()
+    elif account_type == 'ervaringsdeskundige':
+        account = db_session.query(Ervaringsdeskundige).filter_by(id=account_id).first()
+    else:
+        return jsonify({'success': False, 'message': 'Invalid account type'}), 400
+
+    if account:
+        return jsonify({
+            'success': True,
+            'account': {
+                'name': account.naam if account_type == 'organization' else f"{account.voornaam} {account.achternaam}",
+                'email': account.emailadres
+            }
+        })
+    else:
+        return jsonify({'success': False, 'message': 'Account not found'}), 404
+
+@app.route('/edit_account/<string:account_type>/<int:account_id>', methods=['GET', 'POST'])
+def edit_account(account_type, account_id):
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login'))
+
+    if account_type == 'organization':
+        account = db_session.query(Organisatie).get(account_id)
+    elif account_type == 'ervaringsdeskundige':
+        account = db_session.query(Ervaringsdeskundige).get(account_id)
+    else:
+        flash('Invalid account type', 'error')
+        return redirect(url_for('accounts'))
+
+    if not account:
+        flash('Account not found', 'error')
+        return redirect(url_for('accounts'))
+
+    if request.method == 'POST':
+        try:
+            if account_type == 'organization':
+                account.naam = request.form['naam']
+                account.website = request.form['website']
+                account.beschrijving = request.form['beschrijving']
+                account.contactpersoon = request.form['contactpersoon']
+                account.telefoonnummer = request.form['telefoonnummer']
+                account.overige_details = request.form['overige_details']
+            elif account_type == 'ervaringsdeskundige':
+                account.voornaam = request.form['voornaam']
+                account.achternaam = request.form['achternaam']
+                account.postcode = request.form['postcode']
+                account.geslacht = request.form['geslacht']
+                account.emailadres = request.form['emailadres']
+                account.telefoonnummer = request.form['telefoonnummer']
+                account.geboortedatum = datetime.strptime(request.form['geboortedatum'], '%Y-%m-%d').date()
+
+            db_session.commit()
+            flash('Account updated successfully', 'success')
+            return redirect(url_for('accounts'))
+        except Exception as e:
+            db_session.rollback()
+            flash(f'Error updating account: {str(e)}', 'error')
+
+    return render_template('admin/edit_account.html', account=account, account_type=account_type)
+
 
 
 if __name__ == '__main__':

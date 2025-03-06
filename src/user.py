@@ -76,7 +76,6 @@ class UserRegistration:
         )
         db_session.add(new_ervaringsdeskundige)
         db_session.commit()
-
 class AdminActions:
     def approve_ervaringsdeskundige(self, user_id):
         user = db_session.query(Ervaringsdeskundige).get(user_id)

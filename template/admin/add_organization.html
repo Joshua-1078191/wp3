@@ -1,0 +1,51 @@
+{% include 'admin/header.html' %}
+<body id="page-top">
+    <div id="wrapper">
+        {% include 'admin/navbar.html' %}
+        <div class="container-fluid">
+            <h3 class="text-dark mb-4">Add Organization</h3>
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <p class="text-primary m-0 font-weight-bold">New Organization Details</p>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('add_organization') }}" method="post">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="naam">Name</label>
+                                <input type="text" class="form-control" id="naam" name="naam" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="website">Website</label>
+                                <input type="url" class="form-control" id="website" name="website">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="beschrijving">Description</label>
+                            <textarea class="form-control" id="beschrijving" name="beschrijving" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="contactpersoon">Contact Person</label>
+                                <input type="text" class="form-control" id="contactpersoon" name="contactpersoon">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="telefoonnummer">Phone Number</label>
+                                <input type="tel" class="form-control" id="telefoonnummer" name="telefoonnummer">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="overige_details">Additional Details</label>
+                            <textarea class="form-control" id="overige_details" name="overige_details" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Organization</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>   
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+</html>
