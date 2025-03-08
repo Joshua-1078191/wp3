@@ -94,7 +94,7 @@ class Ervaringsdeskundige(Base):
     postcode = Column(String, nullable=False)
     geslacht = Column(String, nullable=False)
     emailadres = Column(String, nullable=False, unique=True)
-    telefoonnummer = Column(String, nullable=True, unique=True)
+    telefoonnummer = Column(String, nullable=True)
     geboortedatum = Column(Date, nullable=False)
     gebruikte_hulpmiddelen = Column(String, nullable=True)
     kort_voorstellen = Column(String, nullable=True)

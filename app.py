@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request, session, jsonify, flash
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Query
 from lib.database_generator import engine, Organisatie, Beheerder, Ervaringsdeskundige
 from src.user import UserLogin, UserRegistration, UserProfile, AdminActions
 from werkzeug.security import check_password_hash
@@ -7,6 +7,7 @@ import random
 import string
 import secrets
 from datetime import datetime
+from sqlalchemy import or_
 
 app = Flask(__name__, template_folder='template')
 app.secret_key = 'your_secret_key'
@@ -49,6 +50,7 @@ def admin_login():
         admin = db_session.query(Beheerder).get(user_id)
         session['admin_name'] = f"{admin.voornaam} {admin.achternaam}"
         return redirect(url_for('admin_index'))
+    flash('Login failed. Please check your email and password.', 'error')
     return redirect(url_for('login'))
 
 @app.route('/organization_login', methods=['POST'])
@@ -63,34 +65,48 @@ def organization_login():
         organization = db_session.query(Organisatie).get(organization_id)
         session['organization'] = {'naam': organization.naam}
         return redirect(url_for('user_index'))
+    flash('Login failed. Please check your organization name and API key.', 'error')
     return redirect(url_for('login'))
 
 @app.route('/ervaringsdeskundige_login', methods=['POST'])
 def ervaringsdeskundige_login():
     api_key = request.form.get('api_key')
-    phone_number = request.form.get('phone_number')
     email = request.form.get('email')
-    
-    user_id, user_type, full_name = user_login.ervaringsdeskundige_login(api_key, phone_number, email)
-    
+
+    user_id, user_type, full_name = user_login.ervaringsdeskundige_login(api_key, email)
+
     if user_id:
         session['user_id'] = user_id
         session['user_type'] = 'ervaringsdeskundige'
+        session['full_name'] = full_name
         return redirect(url_for('user_index'))
     elif user_type == 'not_approved':
         flash('Your account is pending approval. Please wait for admin confirmation.', 'warning')
     else:
-        flash('Invalid credentials. Please check your API key, phone number, and email.', 'error')
+        flash('Login failed. Please check your API key and email.', 'error')
     return redirect(url_for('login'))
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        form_data = request.form
+        form_data = request.form.to_dict()
+
+        # Check if email already exists
+        existing_user = db_session.query(Ervaringsdeskundige).filter_by(emailadres=form_data['emailadres']).first()
+
+        if existing_user:
+            flash('Email address is already registered. Please use a different email.', 'error')
+            return redirect(url_for('register'))
+
+        user_registration = UserRegistration()
         user_registration.register(form_data)
-        return redirect(url_for('home'))
+        flash('Registration successful. Please wait for admin approval.', 'success')
+
     return render_template('user/register.html')
+
+
 
 @app.route('/user/user_index')
 def user_index():
@@ -152,21 +168,57 @@ def profile():
 def accounts():
     if 'user_id' not in session or session.get('user_type') != 'admin':
         return redirect(url_for('login'))
-
+    
     admin_name = get_admin_name()
-    ervaringsdeskundigen = db_session.query(Ervaringsdeskundige).filter_by(accepteerd=True).all()
-    beheerders = db_session.query(Beheerder).all()
-    organisaties = db_session.query(Organisatie).all()
+    search_query = request.args.get('search', '')
+    account_type = request.args.get('account_type', 'all')
+
+    # Start with query objects
+    ervaringsdeskundigen = db_session.query(Ervaringsdeskundige).filter_by(accepteerd=True)
+    beheerders = db_session.query(Beheerder)
+    organisaties = db_session.query(Organisatie)
+
+    if search_query:
+        ervaringsdeskundigen = ervaringsdeskundigen.filter(
+            (Ervaringsdeskundige.voornaam.ilike(f'%{search_query}%')) |
+            (Ervaringsdeskundige.achternaam.ilike(f'%{search_query}%')) |
+            (Ervaringsdeskundige.emailadres.ilike(f'%{search_query}%'))
+        )
+        beheerders = beheerders.filter(
+            (Beheerder.voornaam.ilike(f'%{search_query}%')) |
+            (Beheerder.achternaam.ilike(f'%{search_query}%')) |
+            (Beheerder.emailadres.ilike(f'%{search_query}%'))
+        )
+        organisaties = organisaties.filter(
+            (Organisatie.naam.ilike(f'%{search_query}%')) 
+        )
+
+    if account_type != 'all':
+        if account_type == 'expert':
+            beheerders = beheerders.filter(False)
+            organisaties = organisaties.filter(False)
+        elif account_type == 'admin':
+            ervaringsdeskundigen = ervaringsdeskundigen.filter(False)
+            organisaties = organisaties.filter(False)
+        elif account_type == 'organization':
+            ervaringsdeskundigen = ervaringsdeskundigen.filter(False)
+            beheerders = beheerders.filter(False)
+
+    # Execute the queries to get the results
+    ervaringsdeskundigen = ervaringsdeskundigen.all()
+    beheerders = beheerders.all()
+    organisaties = organisaties.all()
 
     return render_template('admin/accounts.html', 
                            admin_name=admin_name,
                            ervaringsdeskundigen=ervaringsdeskundigen, 
                            beheerders=beheerders, 
-                           organisaties=organisaties)
+                           organisaties=organisaties,
+                           search_query=search_query,
+                           account_type=account_type)
 
 
 
-import secrets  # Add this import at the top of your file
 @app.route('/generate_api_key', methods=['POST'])
 def generate_api_key():
     account_id = request.form.get('account_id')
@@ -229,7 +281,7 @@ def pending():
             else:
                 flash('Failed to disapprove Ervaringsdeskundige', 'error')
         return redirect(url_for('pending'))
-
+    
     pending_users = admin_actions.get_pending_ervaringsdeskundigen()
     return render_template('admin/pending.html', admin_name=admin_name, pending_users=pending_users)
 
@@ -268,7 +320,7 @@ def add_organization():
             db_session.add(new_organization)
             db_session.commit()
             flash('Organization added successfully!', 'success')
-            return redirect(url_for('admin_index'))
+            return redirect(url_for('accounts'))
         except Exception as e:
             db_session.rollback()
             flash(f'Error adding organization: {str(e)}', 'error')
@@ -303,6 +355,7 @@ def get_account(account_type, account_id):
 def edit_account(account_type, account_id):
     if 'user_id' not in session or session.get('user_type') != 'admin':
         return redirect(url_for('login'))
+    admin_name = get_admin_name()
 
     if account_type == 'organization':
         account = db_session.query(Organisatie).get(account_id)
@@ -341,7 +394,7 @@ def edit_account(account_type, account_id):
             db_session.rollback()
             flash(f'Error updating account: {str(e)}', 'error')
 
-    return render_template('admin/edit_account.html', account=account, account_type=account_type)
+    return render_template('admin/edit_account.html', account=account, account_type=account_type, admin_name=admin_name, )
 
 
 

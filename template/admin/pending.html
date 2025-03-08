@@ -4,19 +4,19 @@
     <div id="wrapper">
         {% include 'admin/navbar.html' %}
         <div class="container-fluid">
-            <h3 class="text-dark mb-4">Pending Ervaringsdeskundigen</h3>
+            <h3 class="text-dark mb-4">Pending Registrations</h3>
             <div class="card shadow">
                 <div class="card-header py-3">
-                    <p class="text-primary m-0 fw-bold">Pending Accounts</p>
+                    <p class="text-primary m-0 font-weight-bold">Pending Registrations</p>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
-                        <table class="table table-striped">
+                        <table class="table my-0" id="dataTable">
                             <thead>
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Phone</th>
+                                    <th>Details</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -26,6 +26,29 @@
                                     <td>{{ user.voornaam }} {{ user.achternaam }}</td>
                                     <td>{{ user.emailadres }}</td>
                                     <td>{{ user.telefoonnummer }}</td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#details{{ user.id }}" aria-expanded="false" aria-controls="details{{ user.id }}">
+                                            Show Details
+                                        </button>
+                                        <div class="collapse mt-2" id="details{{ user.id }}">
+                                            <div class="card card-body">
+                                                <p><strong>Postcode:</strong> {{ user.postcode }}</p>
+                                                <p><strong>Gender:</strong> {{ user.geslacht }}</p>
+                                                <p><strong>Phone:</strong> {{ user.telefoonnummer }}</p>
+                                                <p><strong>Date of Birth:</strong> {{ user.geboortedatum }}</p>
+                                                <p><strong>Assistive Devices:</strong> {{ user.gebruikte_hulpmiddelen }}</p>
+                                                <p><strong>Short Introduction:</strong> {{ user.kort_voorstellen }}</p>
+                                                <p><strong>Special Notes:</strong> {{ user.bijzonderheden }}</p>
+                                                <p><strong>Agreed to Terms:</strong> {{ 'Yes' if user.akkoord_voorwaarden else 'No' }}</p>
+                                                <p><strong>Has Supervisor:</strong> {{ 'Yes' if user.toezichthouder else 'No' }}</p>
+                                                {% if user.toezichthouder %}
+                                                    <p><strong>Supervisor Name:</strong> {{ user.naam_toezichthouder }}</p>
+                                                    <p><strong>Supervisor Email:</strong> {{ user.email_toezichthouder }}</p>
+                                                    <p><strong>Supervisor Phone:</strong> {{ user.telefoon_toezichthouder }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td>
                                         <form method="POST" style="display: inline;">
                                             <input type="hidden" name="user_id" value="{{ user.id }}">
@@ -42,15 +65,30 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-
                     </div>
                 </div>
             </div>
         </div>
-            <script src="static/bootstrap/js/bootstrap.min.js"></script>
-            <script src="static/js/theme.js"></script>
-        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
     </div>
+    <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('.btn-info').on('click', function() {
+                console.log('Button clicked');
+                var targetId = $(this).data('bs-target');
+                console.log('Target ID:', targetId);
+                $(targetId).collapse('toggle');
+            });
+        });
+    </script>
 </body>
 
 </html>
+
+

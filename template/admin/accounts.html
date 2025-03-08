@@ -11,29 +11,25 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 text-nowrap">
-                            <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable">
-                                <label>Show
-                                    <select class="form-control form-control-sm custom-select custom-select-sm">
-                                        <option value="10" selected="">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select> entries
-                                </label>
-                            </div>
-                        </div>
                         <div class="col-md-6">
-                            <div class="text-md-right dataTables_filter" id="dataTable_filter">
-                                <form action="{{ url_for('accounts') }}" method="get">
-                                    <label>
-                                        <input type="search" class="form-control form-control-sm" aria-controls="dataTable" placeholder="Search" name="search" value="{{ search_query }}">
-                                    </label>
-                                    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                            <div class="dataTables_filter" id="dataTable_filter">
+                                <form action="{{ url_for('accounts') }}" method="get" class="d-flex align-items-center">
+                                    <input type="search" class="form-control form-control-sm me-2" aria-controls="dataTable" placeholder="Search" name="search" value="{{ search_query }}">
+                                    <select name="account_type" class="form-select form-select-sm me-2" style="width: auto;">
+                                        <option value="all" {% if account_type == 'all' %}selected{% endif %}>All</option>
+                                        <option value="expert" {% if account_type == 'expert' %}selected{% endif %}>Expert</option>
+                                        <option value="admin" {% if account_type == 'admin' %}selected{% endif %}>Admin</option>
+                                        <option value="organization" {% if account_type == 'organization' %}selected{% endif %}>Organization</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm me-2">Filter</button>
+                                    {% if search_query or account_type != 'all' %}
+                                        <button type="button" id="clearFilters" class="btn btn-secondary btn-sm">X</button>
+                                    {% endif %}
                                 </form>
                             </div>
                         </div>
                     </div>
+
                     <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
                         <table class="table my-0" id="dataTable">
                             <thead>
@@ -41,6 +37,7 @@
                                     <th>Name</th>
                                     <th>Type</th>
                                     <th>Email</th>
+                                    <th>Phone number</th>
                                     <th>API key</th>
                                     <th>Actions</th>
                                 </tr>
@@ -51,6 +48,7 @@
                                     <td>{{ ervaringsdeskundige.voornaam }} {{ ervaringsdeskundige.achternaam }}</td>
                                     <td>Expert</td>
                                     <td>{{ ervaringsdeskundige.emailadres }}</td>
+                                    <td>{{ ervaringsdeskundige.telefoonnummer }}</td>
                                     <td>
                                         {% if ervaringsdeskundige.api_key %}
                                             <span class="api-key">{{ ervaringsdeskundige.api_key }}</span>
@@ -70,6 +68,7 @@
                                     <td>Admin</td>
                                     <td>{{ beheerder.emailadres }}</td>
                                     <td>N/A</td>
+                                    <td>N/A</td>
                                     
 
                                 </tr>
@@ -79,6 +78,7 @@
                                     <td>{{ organisatie.naam }}</td>
                                     <td>Organization</td>
                                     <td>{{ organisatie.emailadres }}</td>
+                                    <td>{{ organisatie.telefoonnummer }}</td>
                                     <td>
                                         {% if organisatie.api_key %}
                                             <span class="api-key">{{ organisatie.api_key }}</span>
@@ -124,6 +124,9 @@
             alert('An error occurred while generating the API key.');
         });
     }
+    document.getElementById('clearFilters').addEventListener('click', function() {
+    window.location.href = "{{ url_for('accounts') }}";
+});
 
 
     </script>

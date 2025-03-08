@@ -24,19 +24,18 @@ class UserLogin:
             db_session.commit()
             return api_key
         return None
-    def ervaringsdeskundige_login(self, api_key, phone_number, email):
-        ervaringsdeskundige = db_session.query(Ervaringsdeskundige).filter_by(
-            emailadres=email,
-            telefoonnummer=phone_number
-        ).first()
-        
-        if ervaringsdeskundige and ervaringsdeskundige.api_key == api_key:
-            if ervaringsdeskundige.accepteerd:  # Changed from is_approved to accepteerd
-                full_name = f"{ervaringsdeskundige.voornaam} {ervaringsdeskundige.achternaam}"
-                return ervaringsdeskundige.id, 'ervaringsdeskundige', full_name
-            else:
-                return None, 'not_approved', None
-        return None, None, None
+    def ervaringsdeskundige_login(self, api_key, email):
+            ervaringsdeskundige = db_session.query(Ervaringsdeskundige).filter_by(
+                emailadres=email
+            ).first()
+            
+            if ervaringsdeskundige and ervaringsdeskundige.api_key == api_key:
+                if ervaringsdeskundige.accepteerd:
+                    full_name = f"{ervaringsdeskundige.voornaam} {ervaringsdeskundige.achternaam}"
+                    return ervaringsdeskundige.id, 'ervaringsdeskundige', full_name
+                else:
+                    return None, 'not_approved', None
+            return None, None, None
 
 
 
@@ -54,6 +53,7 @@ class UserProfile:
 
 class UserRegistration:
     def register(self, form_data):
+        toezichthouder_checked = form_data.get('toezichthouder') == 'on'
         new_ervaringsdeskundige = Ervaringsdeskundige(
             voornaam=form_data['voornaam'],
             achternaam=form_data['achternaam'],
@@ -66,16 +66,17 @@ class UserRegistration:
             kort_voorstellen=form_data.get('kort_voorstellen'),
             bijzonderheden=form_data.get('bijzonderheden'),
             akkoord_voorwaarden=form_data.get('akkoord_voorwaarden') == 'on',
-            toezichthouder=form_data.get('toezichthouder') == 'on',
-            naam_toezichthouder=form_data.get('naam_toezichthouder'),
-            email_toezichthouder=form_data.get('email_toezichthouder'),
-            telefoon_toezichthouder=form_data.get('telefoon_toezichthouder'),
+            toezichthouder=toezichthouder_checked,
+            naam_toezichthouder=form_data.get('naam_toezichthouder') if toezichthouder_checked else None,
+            email_toezichthouder=form_data.get('email_toezichthouder') if toezichthouder_checked else None,
+            telefoon_toezichthouder=form_data.get('telefoon_toezichthouder') if toezichthouder_checked else None,
             beperking_id=form_data.get('beperking_id', 1),
-            accepteerd = None,
-            api_key= None
+            accepteerd=None,
+            api_key=None
         )
         db_session.add(new_ervaringsdeskundige)
         db_session.commit()
+
 class AdminActions:
     def approve_ervaringsdeskundige(self, user_id):
         user = db_session.query(Ervaringsdeskundige).get(user_id)
