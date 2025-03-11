@@ -1,13 +1,13 @@
 {% block navbar %}
 <nav class="navbar">
     <a href="{{ url_for('user_index') }}" class="navbar-brand">
-      <img src="{{ url_for('static', filename='images/testlogo.png') }}" alt="Logo" />
+      <img src="{{ url_for('static', filename='img/testlogo.png') }}" alt="Logo" />
       Accessibility Hub
     </a>
     <ul class="navbar-nav">
       <li><a href="{{ url_for('user_index') }}" class="nav-link" aria-current="page">Home</a></li>
-      <li><a href="" class="nav-link">Onderzoeken</a></li>
-      <li><a href="" class="nav-link">Account</a></li>
+      <li><a href="{{ url_for('onderzoeken') }}" class="nav-link">Onderzoeken</a></li>
+      <li><a href="{{ url_for('account') }}" class="nav-link">Account</a></li>
     </ul>
     <div class="dropdown">
       <button class="dropbtn">{{ user_info.type }}: {{ user_info.name }}</button>
