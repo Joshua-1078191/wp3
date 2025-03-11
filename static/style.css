@@ -628,3 +628,25 @@ footer {
 .dataTables_filter input {
   width: 200px;
 }
+
+.btn-minimal {
+  background-color: #0a4270; 
+  color: #fff;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 1rem; 
+}
+
+
+.btn-minimal:hover {
+  background-color: #1E88E5;
+  transform: scale(1.02);
+}
+
+.details-btn {
+  margin-left: 5px; 
+}
