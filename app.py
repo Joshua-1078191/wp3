@@ -240,6 +240,50 @@ def generate_api_key():
         return jsonify({'success': False, 'message': 'Account not found'})
 
 
+@app.route('/user/account')
+def account():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user_type = session.get('user_type')
+    account = None
+    user_info = {}
+
+    if user_type == 'admin':
+        admin = db_session.query(Beheerder).filter_by(id=session['user_id']).first()
+        if admin:
+            account = admin
+            user_info = {
+                'type': 'Admin',
+                'name': f"{admin.voornaam} {admin.achternaam}"
+            }
+    elif user_type == 'organization':
+        org = db_session.query(Organisatie).filter_by(id=session['user_id']).first()
+        if org:
+            account = org
+            user_info = {
+                'type': 'Organisatie',
+                'name': org.naam
+            }
+    elif user_type == 'ervaringsdeskundige':
+        erv = db_session.query(Ervaringsdeskundige).filter_by(id=session['user_id']).first()
+        if erv:
+            account = erv
+            user_info = {
+                'type': 'Ervaringsdeskundige',
+                'name': f"{erv.voornaam} {erv.achternaam}"
+            }
+
+
+    if not account:
+        return redirect(url_for('login'))
+
+    return render_template(
+        'user/account.html',
+        account=account,
+        user_type=user_type,
+        user_info=user_info
+    )
 
 
 
