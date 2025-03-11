@@ -2,11 +2,13 @@
 <body>
   {% include 'user/navbar.html' %}
   <section class="hero">
-    <img src="{{ url_for('static', filename='images/header.jpg') }}" alt="Een diverse groep mensen die samenwerken aan toegankelijke oplossingen" class="hero-image">
+    <img 
+  src="{{ url_for('static', filename='img/header.jpg') }}" alt="Een diverse groep mensen" class="hero-image"
+/>
     <div class="hero-overlay">
       <h1>Welkom bij de Accessibility Hub</h1>
       <p>Een plek waar inclusiviteit en toegankelijkheid samenkomen.</p>
-      <a href="user/onderzoeken.html" class="cta-button">Bekijk Onderzoeken</a>
+      <a href="onderzoeken" class="cta-button">Bekijk Onderzoeken</a>
     </div>
   </section>
   <main class="container">
@@ -48,7 +50,7 @@
         Of ben je ervaringsdeskundige en wil je jouw ervaring delen? 
         Sluit je aan bij de Accessibility Hub.
       </p>
-      <a href="user/onderzoeken.html" class="cta-button">Start nu</a>
+      <a href="onderzoeken" class="cta-button">Start nu</a>
     </section>
   </main>
   <footer>
