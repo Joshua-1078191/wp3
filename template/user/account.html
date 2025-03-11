@@ -4,6 +4,39 @@
   <main>
     <h1>Account</h1>
     <p>Hier kan informatie over het account of gebruikersinstellingen komen.</p>
+
+    {% if user_type == 'organization' %}
+      <div>
+        <h2>Organisatie Details</h2>
+        <p><strong>Naam:</strong> {{ account.naam }}</p>
+        <p><strong>Website:</strong> {{ account.website }}</p>
+        <p><strong>Beschrijving:</strong> {{ account.beschrijving }}</p>
+        <p><strong>Contactpersoon:</strong> {{ account.contactpersoon }}</p>
+        <p><strong>Telefoonnummer:</strong> {{ account.telefoonnummer }}</p>
+        <p><strong>Overige details:</strong> {{ account.overige_details }}</p>
+        <p><strong>API Key:</strong> {{ account.api_key }}</p>
+      </div>
+
+    {% elif user_type == 'admin' %}
+      <div>
+        <h2>Admin Details</h2>
+        <p><strong>Voornaam:</strong> {{ account.voornaam }}</p>
+        <p><strong>Achternaam:</strong> {{ account.achternaam }}</p>
+        <p><strong>Emailadres:</strong> {{ account.emailadres }}</p>
+      </div>
+
+    {% elif user_type == 'ervaringsdeskundige' %}
+      <div>
+        <h2>Ervaringsdeskundige Details</h2>
+        <p><strong>Voornaam:</strong> {{ account.voornaam }}</p>
+        <p><strong>Achternaam:</strong> {{ account.achternaam }}</p>
+        <p><strong>Postcode:</strong> {{ account.postcode }}</p>
+        <p><strong>Geslacht:</strong> {{ account.geslacht }}</p>
+        <p><strong>Emailadres:</strong> {{ account.emailadres }}</p>
+        <p><strong>Telefoonnummer:</strong> {{ account.telefoonnummer }}</p>
+        <p><strong>Geboortedatum:</strong> {{ account.geboortedatum }}</p>
+      </div>
+    {% endif %}
   </main>
   <footer>
     <p>&copy; 2025 Accessibility Hub</p>
