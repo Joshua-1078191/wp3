@@ -13,6 +13,33 @@ De WP3-2025 Accessibility Hub is een op Flask gebaseerde webapplicatie die is on
 
 ## Aan de Slag
 
+### Inloggegevens
+- admin: 123@123.com , password123
+- organisatie: Dummy Organization , 44e91cb696079658475ef6696ae8a03e
+- ervaringsdeskundige: test@test.nl , 	9423939afa8790ebe5b7fbe6945b9e8e
+
+### Virtual Environment Instellen
+
+Het wordt aanbevolen om een virtual environment te gebruiken om afhankelijkheden van je project te beheren. Volg de onderstaande stappen om een virtual environment op te zetten en te activeren:
+
+1. Maak een virtual environment aan:
+   ```bash
+   python -m venv venv
+
+2.
+Activeer de virtual environment:
+Op Windows:
+venv\Scripts\activate
+Op macOS en Linux:
+source venv/bin/activate
+
+3.
+Installeer de vereiste pakketten binnen de virtual environment:
+- pip install flask
+- pip install sqlalchemy
+- pip install flask-swagger-ui
+
+
 ### Vereisten
 
 - Python 3.x
