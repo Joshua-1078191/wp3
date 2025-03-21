@@ -650,3 +650,29 @@ footer {
 .details-btn {
   margin-left: 5px; 
 }
+/* Ensure the table takes full width and has consistent column widths */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+
+
+.btn-minimal:hover {
+  background-color: #0056b3;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px; /* Space between buttons */
+}

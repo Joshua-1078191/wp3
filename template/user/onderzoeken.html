@@ -1,7 +1,7 @@
 {% include 'user/header.html' %}
 <body>
   {% include 'user/navbar.html' %}
-  
+
   <section class="hero hero-small">
     <img src="{{ url_for('static', filename='img/onderzoek.jpg') }}" 
          alt="Een diverse groep mensen" 
@@ -14,7 +14,17 @@
 
   <main class="container">
     <section class="onderzoeken-lijst rounded-block">
-      <h2>Beschikbare Onderzoeken</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Beschikbare Onderzoeken</h2>
+        <div>
+          {% if user_info.type == 'Ervaringsdeskundige' %}
+          <button id="pendingOnderzoekenBtn" class="btn-minimal">Pending Onderzoeken</button>
+          {% endif %}
+          {% if user_info.type == 'Organisatie' %}
+          <button id="applicationsBtn" class="btn-minimal">Applications</button>
+          {% endif %}
+        </div>
+      </div>
       <div class="table-container animate-card">
         <table>
           <thead>
@@ -37,19 +47,41 @@
                 >
                   Details
                 </button>
+                {% if user_info.type == 'Ervaringsdeskundige' %}
+                <form action="{{ url_for('apply_onderzoek', onderzoek_id=o.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-minimal">Apply</button>
+                </form>
+                {% endif %}
               </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      
 
-      <button type="button" id="btnNieuwOnderzoek" class="btn-minimal" >
-        Nieuw onderzoek
-      </button>
+      {% if user_info.type != 'Ervaringsdeskundige' %}
+          <button id="btnNieuwOnderzoek" class="btn-minimal">Nieuw Onderzoek</button>
+      {% endif %}
+
     </section>
   </main>
+
+  <div id="pendingOnderzoekenModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Pending Onderzoeken</h2>
+        <ul id="pendingOnderzoekenList"></ul>
+    </div>
+</div>
+
+<div id="applicationsModal" class="modal" style="display: none;">
+  <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Applications</h2>
+      <ul id="applicationsList"></ul>
+  </div>
+</div>
+
 
   <div id="modalNieuwOnderzoek" class="modal">
     <div class="modal-content" role="dialog" aria-labelledby="modalTitel" aria-modal="true">
@@ -73,7 +105,7 @@
     <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="detailTitel">
       <span class="close" id="closeDetailModal" aria-label="Sluit">&times;</span>
       <h2 id="detailTitel">Onderzoek Details</h2>
-      
+
       <div id="detailBody">
         <p><strong>Titel:</strong> <span id="detail_titel"></span></p>
         <p><strong>Status:</strong> <span id="detail_status"></span></p>
@@ -95,5 +127,11 @@
 
   <script src="{{ url_for('static', filename='js/nieuwOnderzoek.js') }}"></script>
   <script src="{{ url_for('static', filename='js/details_onderzoek.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/pending_onderzoeken.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/applications.js') }}"></script>
 </body>
 </html>
+
+
+
+

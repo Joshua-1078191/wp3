@@ -53,7 +53,7 @@ class Onderzoek(Base):
     doelgroep_leeftijd_van = Column(Integer, nullable=True)
     doelgroep_leeftijd_tot = Column(Integer, nullable=True)
     doelgroep_beperking = Column(Integer, nullable=True)
-
+   
     # Foreign Keys
     beheerder_id = Column(Integer, ForeignKey('beheerder.id'), nullable=False)
     organisatie_id = Column(Integer, ForeignKey('organisatie.id'), nullable=False)
@@ -63,7 +63,8 @@ class Onderzoek(Base):
     beheerder = relationship("Beheerder", back_populates="onderzoeken")
     organisatie = relationship("Organisatie", back_populates="onderzoeken")
     ervaringsdeskundige = relationship("Ervaringsdeskundige", back_populates="onderzoeken")
-
+    applications = relationship("OnderzoekErvaringsdeskundige", back_populates="onderzoek")
+    ervaringsdeskundigen_2 = relationship("OnderzoekErvaringsdeskundige", back_populates="onderzoek")  
 
 class Beperking(Base):
     __tablename__ = 'beperkingen'
@@ -121,14 +122,17 @@ class Ervaringsdeskundige(Base):
     )
 
 
+
 class OnderzoekErvaringsdeskundige(Base):
     __tablename__ = 'onderzoek_ervaringsdeskundige'
 
     onderzoek_id = Column(Integer, ForeignKey('onderzoeken.id'), primary_key=True)
     ervaringsdeskundige_id = Column(Integer, ForeignKey('ervaringsdeskundige.id'), primary_key=True)
     inschrijfdatum = Column(Date, nullable=False)
-
+    status = Column(String, nullable=False, default='pending') 
     ervaringsdeskundige = relationship("Ervaringsdeskundige", back_populates="onderzoeken_2")
+    onderzoek = relationship("Onderzoek", back_populates="ervaringsdeskundigen_2")
+
 
 # Database connection setup
 DATABASE_URL = "sqlite:///databases/database.db"

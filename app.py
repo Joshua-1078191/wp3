@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, session, jsonify, flash
 from sqlalchemy.orm import sessionmaker, Query
-from lib.database_generator import engine, Organisatie, Beheerder, Ervaringsdeskundige, Onderzoek
+from lib.database_generator import engine, Organisatie, Beheerder, Ervaringsdeskundige, Onderzoek, OnderzoekErvaringsdeskundige
 from src.user import UserLogin, UserRegistration, UserProfile, AdminActions
 from werkzeug.security import check_password_hash
 import random
@@ -143,42 +143,43 @@ def user_index():
 def admin_index():
     if 'user_id' not in session or session.get('user_type') != 'admin':
         return redirect(url_for('login'))
-    admin_name = get_admin_name() 
-    
+    admin_name = get_admin_name()
+
     if request.method == 'POST':
         onderzoek_id = request.form.get('onderzoek_id')
         action = request.form.get('action')
-        
+
         onderzoek = db_session.query(Onderzoek).get(onderzoek_id)
         if not onderzoek:
             flash('Onderzoek niet gevonden.', 'error')
             return redirect(url_for('admin_index'))
-        
+
         if action == 'approve':
             onderzoek.status = 'open'
-            onderzoek.beheerder_id = session['user_id']  
+            onderzoek.beheerder_id = session['user_id']
             onderzoek.datum_vanaf = datetime.now()
             onderzoek.datum_tot = datetime.now()  
-            onderzoek.type_onderzoek = 1        
+            onderzoek.type_onderzoek = 1
             db_session.commit()
             flash('Onderzoek is goedgekeurd!', 'success')
-        
+
         elif action == 'disapprove':
 
             db_session.delete(onderzoek)
             db_session.commit()
             flash('Onderzoek is afgekeurd en verwijderd!', 'success')
-        
+
         return redirect(url_for('admin_index'))
-    
+
 
     pending_onderzoeken = db_session.query(Onderzoek).filter_by(status='pending').all()
-    
+
     return render_template(
         'admin/admin_index.html',
         admin_name=admin_name,
         pending_onderzoeken=pending_onderzoeken
     )
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
@@ -202,7 +203,7 @@ def profile():
 def accounts():
     if 'user_id' not in session or session.get('user_type') != 'admin':
         return redirect(url_for('login'))
-    
+
     admin_name = get_admin_name()
     search_query = request.args.get('search', '')
     account_type = request.args.get('account_type', 'all')
@@ -283,23 +284,40 @@ def onderzoeken():
     user_info = {}
     if user_type == 'admin':
         admin = db_session.query(Beheerder).filter_by(id=session['user_id']).first()
-        user_info = {'type': 'Admin','name': f"{admin.voornaam} {admin.achternaam}"}
+        user_info = {'type': 'Admin', 'name': f"{admin.voornaam} {admin.achternaam}"}
     elif user_type == 'organization':
         org = db_session.query(Organisatie).filter_by(id=session['user_id']).first()
-        user_info = {'type': 'Organisatie','name': org.naam}
+        user_info = {'type': 'Organisatie', 'name': org.naam}
     elif user_type == 'ervaringsdeskundige':
         erv = db_session.query(Ervaringsdeskundige).filter_by(id=session['user_id']).first()
-        user_info = {'type': 'Ervaringsdeskundige','name': f"{erv.voornaam} {erv.achternaam}"}
+        user_info = {'type': 'Ervaringsdeskundige', 'name': f"{erv.voornaam} {erv.achternaam}"}
     else:
         return redirect(url_for('login'))
-    
 
-    from lib.database_generator import Onderzoek  
-    approved_onderzoeken = db_session.query(Onderzoek).filter(Onderzoek.status.in_(['open','bezig'])).all()
-    
+    # Fetch all approved onderzoeken
+    approved_onderzoeken = db_session.query(Onderzoek).filter(Onderzoek.status.in_(['open', 'bezig'])).all()
+
+    # For ervaringsdeskundige, filter out the ones they have already applied for
+    if user_type == 'ervaringsdeskundige':
+        applied_onderzoek_ids = db_session.query(OnderzoekErvaringsdeskundige.onderzoek_id).filter_by(
+            ervaringsdeskundige_id=session['user_id']
+        ).all()
+        applied_onderzoek_ids = {id for (id,) in applied_onderzoek_ids}  # Convert to a set of IDs
+        available_onderzoeken = [o for o in approved_onderzoeken if o.id not in applied_onderzoek_ids]
+    else:
+        # For other user types, show all approved onderzoeken
+        available_onderzoeken = approved_onderzoeken
+
+    # Fetch applications for the organization
+    applications = []
+    if user_type == 'organization':
+        applications = db_session.query(OnderzoekErvaringsdeskundige).join(Onderzoek).filter(
+            Onderzoek.organisatie_id == session['user_id']
+        ).all()
     return render_template('user/onderzoeken.html',
                            user_info=user_info,
-                           onderzoeken=approved_onderzoeken)
+                           onderzoeken=available_onderzoeken,
+                           applications=applications)
 
 @app.route('/api/onderzoek/<int:onderzoek_id>', methods=['GET'])
 def get_onderzoek_details(onderzoek_id):
@@ -335,7 +353,7 @@ def new_onderzoek():
         return redirect(url_for('login'))
 
 
-    if session.get('user_type') != 'ervaringsdeskundige':
+    if session.get('user_type') != 'organization':
         flash('Alleen Ervaringsdeskundigen kunnen een onderzoek aanmaken.', 'error')
         return redirect(url_for('onderzoeken'))
 
@@ -353,7 +371,7 @@ def new_onderzoek():
     default_admin_id = 1       
     default_org_id   = 1        
 
-   
+
     erv_id = session['user_id']
 
     nieuw = Onderzoek(
@@ -370,7 +388,7 @@ def new_onderzoek():
         doelgroep_leeftijd_van=None,
         doelgroep_leeftijd_tot=None,
         doelgroep_beperking=None,
-        
+
         beheerder_id=default_admin_id,
         organisatie_id=default_org_id,
         ervaringsdeskundige_id=erv_id
@@ -390,7 +408,7 @@ def new_onderzoek():
 def account():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
+
     user_type = session.get('user_type')
     account = None
     user_info = {}
@@ -471,7 +489,7 @@ def pending():
             else:
                 flash('Failed to disapprove Ervaringsdeskundige', 'error')
         return redirect(url_for('pending'))
-    
+
     pending_users = admin_actions.get_pending_ervaringsdeskundigen()
     return render_template('admin/pending.html', admin_name=admin_name, pending_users=pending_users)
 
@@ -586,7 +604,105 @@ def edit_account(account_type, account_id):
 
     return render_template('admin/edit_account.html', account=account, account_type=account_type, admin_name=admin_name, )
 
+@app.route('/apply_onderzoek/<int:onderzoek_id>', methods=['POST'])
+def apply_onderzoek(onderzoek_id):
+    if 'user_id' not in session or session.get('user_type') != 'ervaringsdeskundige':
+        return redirect(url_for('login'))
 
+    # Check if the user has already applied
+    existing_application = db_session.query(OnderzoekErvaringsdeskundige).filter_by(
+        onderzoek_id=onderzoek_id,
+        ervaringsdeskundige_id=session['user_id']
+    ).first()
+
+    if existing_application:
+        flash('You have already applied for this onderzoek.', 'warning')
+        return redirect(url_for('onderzoeken'))
+
+    # Create a new application
+    application = OnderzoekErvaringsdeskundige(
+        onderzoek_id=onderzoek_id,
+        ervaringsdeskundige_id=session['user_id'],
+        inschrijfdatum=datetime.now().date(),
+        status='pending'  # Set initial status to 'pending'
+    )
+
+    try:
+        db_session.add(application)
+        db_session.commit()
+        flash('Application submitted successfully.', 'success')
+    except Exception as e:
+        db_session.rollback()
+        flash(f'Error submitting application: {str(e)}', 'error')
+
+    return redirect(url_for('onderzoeken'))
+
+
+
+
+
+@app.route('/api/pending_onderzoeken', methods=['GET'])
+def api_pending_onderzoeken():
+    if 'user_id' not in session or session.get('user_type') != 'ervaringsdeskundige':
+        return jsonify([])
+
+    # Fetch pending onderzoeken that the user has applied to
+    pending_onderzoeken = db_session.query(Onderzoek).join(OnderzoekErvaringsdeskundige).filter(
+        OnderzoekErvaringsdeskundige.ervaringsdeskundige_id == session['user_id'],
+
+    ).all()
+
+    return jsonify([{'titel': o.titel} for o in pending_onderzoeken])
+
+
+
+@app.route('/api/applications', methods=['GET'])
+def api_applications():
+    if 'user_id' not in session or session.get('user_type') != 'organization':
+        return jsonify([])
+
+    applications = db_session.query(OnderzoekErvaringsdeskundige).join(Onderzoek).filter(
+        Onderzoek.organisatie_id == session['user_id']
+    ).all()
+
+    return jsonify([{
+        'ervaringsdeskundige': f"{a.ervaringsdeskundige.voornaam} {a.ervaringsdeskundige.achternaam}",
+        'onderzoek': a.onderzoek.titel,
+        'onderzoek_id': a.onderzoek_id,
+        'ervaringsdeskundige_id': a.ervaringsdeskundige_id
+    } for a in applications])
+
+
+@app.route('/approve_application/<int:onderzoek_id>/<int:ervaringsdeskundige_id>', methods=['POST'])
+def approve_application(onderzoek_id, ervaringsdeskundige_id):
+    if 'user_id' not in session or session.get('user_type') != 'organization':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    application = db_session.query(OnderzoekErvaringsdeskundige).filter_by(
+        onderzoek_id=onderzoek_id,
+        ervaringsdeskundige_id=ervaringsdeskundige_id
+    ).first()
+    if application:
+        application.status = 'approved'
+        db_session.commit()
+        return jsonify({'success': True, 'message': 'Application approved successfully.'})
+    return jsonify({'success': False, 'message': 'Application not found.'}), 404
+
+@app.route('/disapprove_application/<int:onderzoek_id>/<int:ervaringsdeskundige_id>', methods=['POST'])
+def disapprove_application(onderzoek_id, ervaringsdeskundige_id):
+    if 'user_id' not in session or session.get('user_type') != 'organization':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    application = db_session.query(OnderzoekErvaringsdeskundige).filter_by(
+        onderzoek_id=onderzoek_id,
+        ervaringsdeskundige_id=ervaringsdeskundige_id
+    ).first()
+    if application:
+        application.status = 'disapproved'
+        db_session.commit()
+        return jsonify({'success': True, 'message': 'Application disapproved successfully.'})
+    return jsonify({'success': False, 'message': 'Application not found.'}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
+
