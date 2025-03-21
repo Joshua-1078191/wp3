@@ -1,0 +1,135 @@
+{% include 'admin/header.html' %}
+<body id="page-top">
+    <div id="wrapper">
+        {% include 'admin/navbar.html' %}
+        <div class="container-fluid">
+            <h3 class="text-dark mb-4">Accounts</h3>
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <p class="text-primary m-0 font-weight-bold">Account Management</p>
+                    <a href="{{ url_for('add_organization') }}" class="btn btn-primary" type="button">Add New Organization</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="dataTables_filter" id="dataTable_filter">
+                                <form action="{{ url_for('accounts') }}" method="get" class="d-flex align-items-center">
+                                    <input type="search" class="form-control form-control-sm me-2" aria-controls="dataTable" placeholder="Search" name="search" value="{{ search_query }}">
+                                    <select name="account_type" class="form-select form-select-sm me-2" style="width: auto;">
+                                        <option value="all" {% if account_type == 'all' %}selected{% endif %}>All</option>
+                                        <option value="expert" {% if account_type == 'expert' %}selected{% endif %}>Expert</option>
+                                        <option value="admin" {% if account_type == 'admin' %}selected{% endif %}>Admin</option>
+                                        <option value="organization" {% if account_type == 'organization' %}selected{% endif %}>Organization</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm me-2">Filter</button>
+                                    {% if search_query or account_type != 'all' %}
+                                        <button type="button" id="clearFilters" class="btn btn-secondary btn-sm">X</button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
+                        <table class="table my-0" id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Email</th>
+                                    <th>Phone number</th>
+                                    <th>API key</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ervaringsdeskundige in ervaringsdeskundigen %}
+                                <tr>
+                                    <td>{{ ervaringsdeskundige.voornaam }} {{ ervaringsdeskundige.achternaam }}</td>
+                                    <td>Expert</td>
+                                    <td>{{ ervaringsdeskundige.emailadres }}</td>
+                                    <td>{{ ervaringsdeskundige.telefoonnummer }}</td>
+                                    <td>
+                                        {% if ervaringsdeskundige.api_key %}
+                                            <span class="api-key">{{ ervaringsdeskundige.api_key }}</span>
+                                        {% else %}
+                                            <span>No API key</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button onclick="generateApiKey('{{ ervaringsdeskundige.id }}', 'ervaringsdeskundige')" class="btn btn-primary btn-sm">Generate API Key</button>
+                                        <a href="{{ url_for('edit_account', account_type='ervaringsdeskundige', account_id=ervaringsdeskundige.id) }}" class="btn btn-primary btn-sm">Edit</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% for beheerder in beheerders %}
+                                <tr>
+                                    <td>{{ beheerder.voornaam }} {{ beheerder.achternaam }}</td>
+                                    <td>Admin</td>
+                                    <td>{{ beheerder.emailadres }}</td>
+                                    <td>N/A</td>
+                                    <td>N/A</td>
+                                    
+
+                                </tr>
+                                {% endfor %}
+                                {% for organisatie in organisaties %}
+                                <tr>
+                                    <td>{{ organisatie.naam }}</td>
+                                    <td>Organization</td>
+                                    <td>{{ organisatie.emailadres }}</td>
+                                    <td>{{ organisatie.telefoonnummer }}</td>
+                                    <td>
+                                        {% if organisatie.api_key %}
+                                            <span class="api-key">{{ organisatie.api_key }}</span>
+                                        {% else %}
+                                            <span>No API key</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                         <button onclick="generateApiKey('{{ organisatie.id }}', 'organization')" class="btn btn-primary btn-sm">Generate API Key</button>
+                                         <a href="{{ url_for('edit_account', account_type='organization', account_id=organisatie.id) }}" class="btn btn-primary btn-sm">Edit</a>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>   
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script>
+    function generateApiKey(accountId, accountType) {
+        fetch('/generate_api_key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `account_id=${accountId}&account_type=${accountType}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`New API Key: ${data.api_key}`);
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while generating the API key.');
+        });
+    }
+    document.getElementById('clearFilters').addEventListener('click', function() {
+    window.location.href = "{{ url_for('accounts') }}";
+});
+
+
+    </script>
+</body>
+</html>
+

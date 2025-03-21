@@ -1,0 +1,137 @@
+{% include 'user/header.html' %}
+<body>
+  {% include 'user/navbar.html' %}
+
+  <section class="hero hero-small">
+    <img src="{{ url_for('static', filename='img/onderzoek.jpg') }}" 
+         alt="Een diverse groep mensen" 
+         class="hero-image">
+    <div class="hero-overlay hero-overlay-small">
+      <h1>Onderzoeken</h1>
+      <p>Bekijk hier lopende en nieuwe onderzoeken</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <section class="onderzoeken-lijst rounded-block">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Beschikbare Onderzoeken</h2>
+        <div>
+          {% if user_info.type == 'Ervaringsdeskundige' %}
+          <button id="pendingOnderzoekenBtn" class="btn-minimal">Pending Onderzoeken</button>
+          {% endif %}
+          {% if user_info.type == 'Organisatie' %}
+          <button id="applicationsBtn" class="btn-minimal">Applications</button>
+          {% endif %}
+        </div>
+      </div>
+      <div class="table-container animate-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Onderzoek</th>
+              <th>Status</th>
+              <th>Acties</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for o in onderzoeken %}
+            <tr>
+              <td>{{ o.titel }}</td>
+              <td>{{ o.status }}</td>
+              <td>
+                <button 
+                  type="button" 
+                  class="btn-minimal details-btn"
+                  data-onderzoek-id="{{ o.id }}"
+                >
+                  Details
+                </button>
+                {% if user_info.type == 'Ervaringsdeskundige' %}
+                <form action="{{ url_for('apply_onderzoek', onderzoek_id=o.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-minimal">Apply</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if user_info.type != 'Ervaringsdeskundige' %}
+          <button id="btnNieuwOnderzoek" class="btn-minimal">Nieuw Onderzoek</button>
+      {% endif %}
+
+    </section>
+  </main>
+
+  <div id="pendingOnderzoekenModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Pending Onderzoeken</h2>
+        <ul id="pendingOnderzoekenList"></ul>
+    </div>
+</div>
+
+<div id="applicationsModal" class="modal" style="display: none;">
+  <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Applications</h2>
+      <ul id="applicationsList"></ul>
+  </div>
+</div>
+
+
+  <div id="modalNieuwOnderzoek" class="modal">
+    <div class="modal-content" role="dialog" aria-labelledby="modalTitel" aria-modal="true">
+      <span class="close" id="closeModal" aria-label="Sluit">&times;</span>
+      <h2 id="modalTitel">Nieuw Onderzoek</h2>
+      <form id="formNieuwOnderzoek" action="{{ url_for('new_onderzoek') }}" method="POST">
+        <div class="form-group">
+          <label for="naamOnderzoek">Naam van het onderzoek <span class="req">*</span></label>
+          <input type="text" id="naamOnderzoek" name="titel" required />
+        </div>
+        <div class="form-group">
+          <label for="beschrijvingOnderzoek">Beschrijving van het onderzoek <span class="req">*</span></label>
+          <textarea id="beschrijvingOnderzoek" name="beschrijving" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="modal-button">Verstuur</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalDetailOnderzoek" class="modal">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="detailTitel">
+      <span class="close" id="closeDetailModal" aria-label="Sluit">&times;</span>
+      <h2 id="detailTitel">Onderzoek Details</h2>
+
+      <div id="detailBody">
+        <p><strong>Titel:</strong> <span id="detail_titel"></span></p>
+        <p><strong>Status:</strong> <span id="detail_status"></span></p>
+        <p><strong>Beschrijving:</strong> <span id="detail_beschrijving"></span></p>
+        <p><strong>Datum vanaf:</strong> <span id="detail_datum_vanaf"></span></p>
+        <p><strong>Datum tot:</strong> <span id="detail_datum_tot"></span></p>
+        <p><strong>Type onderzoek:</strong> <span id="detail_type_onderzoek"></span></p>
+        <p><strong>Locatie:</strong> <span id="detail_locatie"></span></p>
+        <p><strong>Beheerder:</strong> <span id="detail_beheerder"></span></p>
+        <p><strong>Organisatie:</strong> <span id="detail_organisatie"></span></p>
+        <p><strong>Ervaringsdeskundige:</strong> <span id="detail_ervaringsdeskundige"></span></p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Accessibility Hub</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/nieuwOnderzoek.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/details_onderzoek.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/pending_onderzoeken.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/applications.js') }}"></script>
+</body>
+</html>
+
+
+
+

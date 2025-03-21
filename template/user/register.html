@@ -1,0 +1,49 @@
+{% include 'user/header.html' %}
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="user/user_index.html" class="navbar-brand">
+                <img src="{{ url_for('static', filename='images/testlogo.png') }}" alt="Logo" />
+            </a>
+        </nav>
+    </header>
+    <section class="register-form">
+        <h1>Register as Ervaringsdeskundige</h1>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('register') }}" method="POST">
+            <input type="text" name="voornaam" placeholder="First Name" required>
+            <input type="text" name="achternaam" placeholder="Last Name" required>
+            <input type="text" name="postcode" placeholder="Postal Code" required>
+            <select name="geslacht" required>
+                <option value="" disabled selected>Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            <input type="email" name="emailadres" placeholder="Email" required>
+            <input type="text" name="telefoonnummer" placeholder="Phone Number">
+            <input type="date" name="geboortedatum" placeholder="Date of Birth" required>
+            <input type="text" name="gebruikte_hulpmiddelen" placeholder="Used Aids">
+            <textarea name="kort_voorstellen" placeholder="Short Introduction"></textarea>
+            <textarea name="bijzonderheden" placeholder="Remarks"></textarea>
+            <label for="akkoord_voorwaarden">Agree to Terms</label>
+            <input type="checkbox" name="akkoord_voorwaarden" required>
+            <br>
+            <label for="toezichthouder">Supervisor</label>
+            <input type="checkbox" name="toezichthouder">
+            <input type="text" name="naam_toezichthouder" placeholder="Supervisor Name">
+            <input type="email" name="email_toezichthouder" placeholder="Supervisor Email">
+            <input type="text" name="telefoon_toezichthouder" placeholder="Supervisor Phone">
+            <button type="submit" class="btn">Register</button>
+            <button onclick="location.href='{{ url_for('home') }}'" class="btn">Back</button>
+        </form>
+    </section>
+</body>
+</html>

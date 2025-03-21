@@ -1,0 +1,61 @@
+{% include 'admin/header.html' %}
+<body id="page-top">
+    <div id="wrapper">
+        {% include 'admin/navbar.html' %}
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div class="container-fluid">
+                    <h3 class="text-dark mb-4">Profile</h3>
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card shadow mb-3">
+                                <div class="card-header py-3">
+                                    <p class="text-primary m-0 fw-bold">User Settings</p>
+                                </div>
+                                <div class="card-body">
+                                    <form id="profileForm" method="post">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3"><label class="form-label" for="voornaam"><strong>First Name</strong></label><input class="form-control" type="text" id="voornaam" placeholder="John" name="voornaam" value="{{ beheerder.voornaam }}" readonly></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3"><label class="form-label" for="achternaam"><strong>Last Name</strong></label><input class="form-control" type="text" id="achternaam" placeholder="Doe" name="achternaam" value="{{ beheerder.achternaam }}" readonly></div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="mb-3"><label class="form-label" for="email"><strong>Email Address</strong></label><input class="form-control" type="email" id="email" placeholder="user@example.com" name="email" value="{{ beheerder.emailadres }}" readonly></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3"><button class="btn btn-primary btn-sm" type="button" id="editProfileBtn">Edit Profile</button></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+    </div>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let editMode = false;
+
+            $('#editProfileBtn').click(function() {
+                editMode = !editMode;
+                if (editMode) {
+                    $(this).text('Save Changes');
+                    $('input').prop('readonly', false);
+                } else {
+                    $(this).text('Edit Profile');
+                    $('input').prop('readonly', true);
+                    $('#profileForm').submit();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

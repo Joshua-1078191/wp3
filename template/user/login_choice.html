@@ -1,0 +1,105 @@
+{% include 'user/header.html' %}
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="user/user_index.html" class="navbar-brand">
+                <img src="{{ url_for('static', filename='images/testlogo.png') }}" alt="Logo" />
+            </a>
+        </nav>
+    </header>
+    <section class="login-choice">
+        <h1>Choose Your Login Type</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="choices">
+
+            <a href="#" class="btn btn-admin">Login as Admin</a>
+            <a href="#" class="btn btn-organization">Login as Organization</a>
+            <a href="#" class="btn btn-ervaringsdeskundige">Login as Ervaringsdeskundige</a>
+        </div>
+        <button onclick="location.href='{{ url_for('home') }}'" class="btn">Back</button>
+    </section>
+    <script>
+        function showLoginForm(userType) {
+            let loginFormHtml;
+            if (userType === 'admin') {
+                loginFormHtml = `
+                    <div class="popup">
+                        <div class="popup-content">
+                            <span class="close">&times;</span>
+                            <h2>Admin Login</h2>
+                            <form action="/admin_login" method="post">
+                                <label for="email">Email:</label>
+                                <input type="text" id="email" name="email" required>
+                                <label for="password">Password:</label>
+                                <input type="password" id="password" name="password" required>
+                                <button type="submit">Login</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            } else if (userType === 'organization') {
+                loginFormHtml = `
+                    <div class="popup">
+                        <div class="popup-content">
+                            <span class="close">&times;</span>
+                            <h2>Organization Login</h2>
+                            <form action="/organization_login" method="post">
+                                <label for="name">Organization Name:</label>
+                                <input type="text" id="name" name="name" required>
+                                <label for="api_key">API Key:</label>
+                                <input type="text" id="api_key" name="api_key" required>
+                                <button type="submit">Login</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            } else if (userType === 'ervaringsdeskundige') {
+                loginFormHtml = `
+                    <div class="popup">
+                        <div class="popup-content">
+                            <span class="close">&times;</span>
+                            <h2>Ervaringsdeskundige Login</h2>
+                            <form action="{{ url_for('ervaringsdeskundige_login') }}" method="post">
+                                <input type="email" name="email" placeholder="Email" required>
+                                <input type="text" name="api_key" placeholder="API Key" required>
+                                <button type="submit">Login</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+            document.body.insertAdjacentHTML('beforeend', loginFormHtml);
+            const popup = document.querySelector('.popup');
+            const closeBtn = document.querySelector('.close');
+            closeBtn.onclick = function() {
+                popup.remove();
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const adminButton = document.querySelector('.btn-admin');
+            const organizationButton = document.querySelector('.btn-organization');
+            const ervaringsdeskundigeButton = document.querySelector('.btn-ervaringsdeskundige');
+            adminButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                showLoginForm('admin');
+            });
+            organizationButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                showLoginForm('organization');
+            });
+            ervaringsdeskundigeButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                showLoginForm('ervaringsdeskundige');
+            });
+        });
+    </script>
+</body>
+</html>
+

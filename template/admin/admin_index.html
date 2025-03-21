@@ -1,0 +1,64 @@
+{% include 'admin/header.html' %}
+<body id="page-top">
+    <div id="wrapper">
+        {% include 'admin/navbar.html' %}
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content" class="container-fluid">
+
+                <h3 class="text-dark mb-4">Dashboard</h3>
+                
+                <h4 class="text-dark mb-3">Pending Onderzoeken</h4>
+                <div class="card shadow mb-4">
+                  <div class="card-header py-3">
+                    <p class="text-primary m-0 font-weight-bold">Onderzoeken die wachten op goedkeuring</p>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table align-middle">
+                        <thead>
+                          <tr>
+                            <th>Titel</th>
+                            <th>Beschrijving</th>
+                            <th>Actie</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for ond in pending_onderzoeken %}
+                          <tr>
+                            <td>{{ ond.titel }}</td>
+                            <td>{{ ond.beschrijving }}</td>
+                            <td>
+                              <form method="POST" style="display:inline;">
+                                <input type="hidden" name="onderzoek_id" value="{{ ond.id }}">
+                                <input type="hidden" name="action" value="approve">
+                                <button class="btn btn-success btn-sm" type="submit">Approve</button>
+                              </form>
+                              <form method="POST" style="display:inline;">
+                                <input type="hidden" name="onderzoek_id" value="{{ ond.id }}">
+                                <input type="hidden" name="action" value="disapprove">
+                                <button class="btn btn-danger btn-sm" type="submit">Disapprove</button>
+                              </form>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                          {% if not pending_onderzoeken %}
+                          <tr><td colspan="3" class="text-muted">Geen pending onderzoeken</td></tr>
+                          {% endif %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+        
+        <a class="border rounded d-inline scroll-to-top" href="#page-top">
+          <i class="fas fa-angle-up"></i>
+        </a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{% include 'user/header.html' %}
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="user/user_index.html" class="navbar-brand">
+                <img src="{{ url_for('static', filename='images/testlogo.png') }}" alt="Logo" />
+            </a>
+        </nav>
+    </header>
+    <section class="home-content">
+        <h1>Welcome to the Application</h1>
+        <div class="links">
+            <a href="{{ url_for('login') }}" class="btn">Login</a>
+            <a href="{{ url_for('register') }}" class="btn">Register</a>
+        </div>
+    </section>
+</body>
+</html>

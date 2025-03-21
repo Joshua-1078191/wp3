@@ -1,0 +1,87 @@
+{% include 'admin/header.html' %}
+<body id="page-top">
+    <div id="wrapper">
+        {% include 'admin/navbar.html' %}
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div class="container-fluid">
+                    <h2 class="text-dark mb-4">Edit {{ account_type.capitalize() }} Account</h2>
+                    <div class="card shadow mb-4">
+                        <div class="card-body">
+                            <form action="{{ url_for('edit_account', account_type=account_type, account_id=account.id) }}" method="POST">
+                                {% if account_type == 'organization' %}
+                                    <div class="form-group">
+                                        <label for="naam">Name</label>
+                                        <input type="text" class="form-control" id="naam" name="naam" value="{{ account.naam }}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="website">Website</label>
+                                        <input type="url" class="form-control" id="website" name="website" value="{{ account.website }}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="beschrijving">Description</label>
+                                        <textarea class="form-control" id="beschrijving" name="beschrijving" rows="3" required>{{ account.beschrijving }}</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contactpersoon">Contact Person</label>
+                                        <input type="text" class="form-control" id="contactpersoon" name="contactpersoon" value="{{ account.contactpersoon }}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="telefoonnummer">Phone Number</label>
+                                        <input type="tel" class="form-control" id="telefoonnummer" name="telefoonnummer" value="{{ account.telefoonnummer }}" pattern="^06(\s?\d{8})$" title="Please enter a valid phone number" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="overige_details">Additional Details</label>
+                                        <textarea class="form-control" id="overige_details" name="overige_details" rows="3">{{ account.overige_details }}</textarea>
+                                    </div>
+                                {% elif account_type == 'ervaringsdeskundige' %}
+                                    <div class="form-group">
+                                        <label for="voornaam">First Name</label>
+                                        <input type="text" class="form-control" id="voornaam" name="voornaam" value="{{ account.voornaam }}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="achternaam">Last Name</label>
+                                        <input type="text" class="form-control" id="achternaam" name="achternaam" value="{{ account.achternaam }}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="postcode">Postal Code</label>
+                                        <input type="text" class="form-control" id="postcode" name="postcode" value="{{ account.postcode }}" pattern="\d{4}\s?[A-Za-z]{2}" title="Please enter a valid Dutch postal code" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="geslacht">Gender</label>
+                                        <select class="form-control" id="geslacht" name="geslacht" required>
+                                            <option value="M" {% if account.geslacht == 'M' %}selected{% endif %}>Male</option>
+                                            <option value="F" {% if account.geslacht == 'F' %}selected{% endif %}>Female</option>
+                                            <option value="O" {% if account.geslacht == 'O' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="emailadres">Email</label>
+                                        <input type="email" class="form-control" id="emailadres" name="emailadres" value="{{ account.emailadres }}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="telefoonnummer">Phone Number</label>
+                                        <input type="tel" class="form-control" id="telefoonnummer" name="telefoonnummer" value="{{ account.telefoonnummer }}" pattern="^06(\s?\d{8})$" title="Please enter a valid phone number" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="geboortedatum">Date of Birth</label>
+                                        <input type="date" class="form-control" id="geboortedatum" name="geboortedatum" value="{{ account.geboortedatum }}" required>
+                                    </div>
+                                    
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>   
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+
+
+</html>
+
