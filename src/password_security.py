@@ -1,15 +1,18 @@
 
-import hashlib
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+PASSWORD_HASH_METHOD = 'scrypt:32768:8:1'
 
 
 def hash_password(password: str) -> str:
 
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return generate_password_hash(password, method=PASSWORD_HASH_METHOD)
 
 
 def verify_password(password_hash: str, password: str) -> bool:
 
-    return password_hash == hash_password(password)
+    return check_password_hash(password_hash, password)
 
 
 def is_password_strong(password: str) -> tuple[bool, str]:
@@ -33,28 +36,17 @@ def is_password_strong(password: str) -> tuple[bool, str]:
     return True, "Password is strong"
 
 
-# Example usage and testing
 if __name__ == '__main__':
-    # Test password hashing
     test_password = "password123"
+    
+    # Hash same password twice
+    hash1 = hash_password(test_password)
+    hash2 = hash_password(test_password)
+    
 
-    # Hash a password
-    hashed = hash_password(test_password)
-    print(f"Original password: {test_password}")
-    print(f"Hashed password: {hashed}\n")
-    
-    # Verify correct password
-    print(f"Verify correct password: {verify_password(hashed, test_password)}")
-    
-    # Verify incorrect password
-    print(f"Verify incorrect password: {verify_password(hashed, 'WrongPassword')}\n")
-    
-    hashed1 = hash_password(test_password)
-    hashed2 = hash_password(test_password)
-
-    # Show that different passwords have different hashes
-    print("=== Different passwords (still insecure without salt) ===")
-    print(f"'password123' -> {hash_password('password123')}")
-    print(f"'password456' -> {hash_password('password456')}")
-    print(f"'password123' -> {hash_password('password123')} (same as first!)\n")
+    print(f"Password: {test_password}")
+    print(f"Hash 1: {hash1}")
+    print(f"Hash 2: {hash2}")
+    print(f"Hashes different (salt working): {hash1 != hash2}")
+    print(f"Both verify correctly: {verify_password(hash1, test_password) and verify_password(hash2, test_password)}")
 
