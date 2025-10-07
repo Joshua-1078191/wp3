@@ -1,10 +1,22 @@
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 from lib.database_generator import db_session, Beheerder, Organisatie, Ervaringsdeskundige
+from src.password_security import hash_password, verify_password
 import secrets
 from datetime import datetime
 
 class UserLogin:
     def admin_login(self, email, password):
+        """
+        Authenticate admin user with email and password.
+        Uses secure password hashing with salt for verification.
+        
+        Args:
+            email: Admin email address
+            password: Plain text password to verify
+            
+        Returns:
+            Tuple of (user_id, user_type) if successful, (None, None) otherwise
+        """
         admin = db_session.query(Beheerder).filter_by(emailadres=email).first()
         if admin and check_password_hash(admin.wachtwoord_hash, password):
             return admin.id, 'admin'
