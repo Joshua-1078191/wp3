@@ -1,4 +1,3 @@
-from werkzeug.security import check_password_hash
 from lib.database_generator import db_session, Beheerder, Organisatie, Ervaringsdeskundige
 from src.password_security import hash_password, verify_password
 import secrets
@@ -18,7 +17,7 @@ class UserLogin:
             Tuple of (user_id, user_type) if successful, (None, None) otherwise
         """
         admin = db_session.query(Beheerder).filter_by(emailadres=email).first()
-        if admin and check_password_hash(admin.wachtwoord_hash, password):
+        if admin and verify_password(admin.wachtwoord_hash, password):
             return admin.id, 'admin'
         return None, None
 

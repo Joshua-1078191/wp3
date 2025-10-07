@@ -2,7 +2,6 @@ from flask import Flask, render_template, redirect, url_for, request, session, j
 from sqlalchemy.orm import sessionmaker, Query
 from lib.database_generator import engine, Organisatie, Beheerder, Ervaringsdeskundige, Onderzoek, OnderzoekErvaringsdeskundige
 from src.user import UserLogin, UserRegistration, UserProfile, AdminActions
-from werkzeug.security import check_password_hash
 import random
 import string
 import secrets
